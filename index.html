@@ -19,6 +19,9 @@
     h1{font-size:clamp(2rem,7vw,3.5rem);line-height:1.04;letter-spacing:-.045em;margin:0 0 18px;font-weight:700}
     .tagline{font-size:clamp(1.15rem,3.5vw,1.45rem);line-height:1.45;margin:0 auto 18px;color:#e7e9ee}
     .about{max-width:570px;margin:0 auto;color:var(--muted);font-size:1rem;line-height:1.7}
+    .games{margin:30px auto 0;display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+    .game-link{display:inline-block;padding:12px 18px;border:1px solid #343947;border-radius:10px;color:#f5f7fb;text-decoration:none;background:rgba(255,255,255,.035);font-weight:650;letter-spacing:.01em;transition:.18s ease}
+    .game-link:hover{transform:translateY(-2px);border-color:#626b80;background:rgba(255,255,255,.065)}
     footer{margin-top:54px;color:#666d79;font-size:.82rem;letter-spacing:.02em}
     @media (max-width:520px){main{padding:32px 22px}.logo-wrap{margin-bottom:26px}footer{margin-top:42px}}
   </style>
@@ -32,6 +35,7 @@
       <h1 id="title">Games worth getting lost in.</h1>
       <p class="tagline">Independent game &amp; web development.</p>
       <p class="about">North Path Interactive is focused on old-school dungeon RPGs, modern web experiences, and whatever lies down the next path.</p>
+      <div class="games"><a class="game-link" href="/asteroid/">Play Asteroid →</a></div>
       <footer>© 2026 North Path Interactive</footer>
     </section>
   </main>
