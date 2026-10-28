@@ -112,10 +112,10 @@
   {
     "id": "dungeon-21",
     "name": "Dungeon 21",
-    "group": "production",
+    "group": "development",
     "cat": "games",
     "type": "Blackjack RPG",
-    "status": "In production",
+    "status": "In development",
     "version": "0.1.0",
     "description": "Explore a pocket dungeon and battle monsters with blackjack. Smarter enemies. More hearts. One more hand.",
     "url": "https://northpathinteractive.github.io/dungeon-21/",
