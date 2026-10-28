@@ -22,3 +22,13 @@ Dungeon 21 is the pilot: [project page](https://northpathinteractive.github.io/p
 Historical reconstruction, bulk version changes, and changelog backfills for other projects are on hold pending Steve's review of Dungeon 21. Apply the publishing standard to future authorized work; this instruction does not authorize a retrospective audit or publication of unrelated changes.
 
 See [site changelog](CHANGELOG.md) for changes to shared publishing practices.
+
+## C64 RPG archive
+
+Prepared 28 October 2026. Archived builds require emulator testing before browser-play promotion.
+
+- [The Vaults of Velora](projects/vaults-of-velora/) · [Changelog](projects/vaults-of-velora/CHANGELOG.md)
+- [Asterra Engine](projects/asterra-engine/) · [Changelog](projects/asterra-engine/CHANGELOG.md)
+- [GORK 1](projects/gork-1/) · [Changelog](projects/gork-1/CHANGELOG.md)
+
+[Original-file checksums](rpg-archive-manifest.json).

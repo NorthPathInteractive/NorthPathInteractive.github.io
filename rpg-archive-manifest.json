@@ -1,0 +1,72 @@
+[
+  {
+    "project": "vaults-of-velora",
+    "original_filename": "VELORA-FULL-PROTOTYPE-v2.prg",
+    "path": "projects/vaults-of-velora/downloads/VELORA-FULL-PROTOTYPE-v2.prg",
+    "bytes": 10499,
+    "sha256": "cd0538965bb45a74f215706412354b2e7b930ad13763ba0cbf3f646158003e5f"
+  },
+  {
+    "project": "vaults-of-velora",
+    "original_filename": "VELORA-MAP-TEST.prg",
+    "path": "projects/vaults-of-velora/downloads/VELORA-MAP-TEST.prg",
+    "bytes": 1788,
+    "sha256": "aae8539a247edbce1c5c03354fe6be976d1c322da249d33d9d7f3b8ef84aad1a"
+  },
+  {
+    "project": "asterra-engine",
+    "original_filename": "asterra_test_slice 3.d64",
+    "path": "projects/asterra-engine/downloads/asterra_test_slice-3.d64",
+    "bytes": 174848,
+    "sha256": "de90b6cb4e4753f6480aa39558675c220de18d222f1e4ab41c5531a821c1c6b8"
+  },
+  {
+    "project": "asterra-engine",
+    "original_filename": "asterra_test_slice 4.d64",
+    "path": "projects/asterra-engine/downloads/asterra_test_slice-4.d64",
+    "bytes": 174848,
+    "sha256": "de90b6cb4e4753f6480aa39558675c220de18d222f1e4ab41c5531a821c1c6b8"
+  },
+  {
+    "project": "asterra-engine",
+    "original_filename": "asterra_wireframe.bas",
+    "path": "projects/asterra-engine/downloads/asterra_wireframe.bas",
+    "bytes": 2380,
+    "sha256": "d9953cefc227ecf6d7cbfaf7da964e617e78a8307455371510e362252274b52c"
+  },
+  {
+    "project": "asterra-engine",
+    "original_filename": "asterra_visibility_test.prg",
+    "path": "projects/asterra-engine/downloads/asterra_visibility_test.prg",
+    "bytes": 2068,
+    "sha256": "92eb93e74dd8e66dc6d15e72b1c398b97b30b176404928941baf3e9c633a7759"
+  },
+  {
+    "project": "asterra-engine",
+    "original_filename": "asterra_visibility_test_v2.prg",
+    "path": "projects/asterra-engine/downloads/asterra_visibility_test_v2.prg",
+    "bytes": 2066,
+    "sha256": "1ea13e01b9c8e4829c60bcd51abd3d78d49a2fd0fee88e2796987540e5d45e4d"
+  },
+  {
+    "project": "asterra-engine",
+    "original_filename": "asterra_visibility_test_v3.prg",
+    "path": "projects/asterra-engine/downloads/asterra_visibility_test_v3.prg",
+    "bytes": 2082,
+    "sha256": "7296aaf4dc17a4fc104fbf586848cfcf470fc1a1b3c2ae6123eb91ec5fa5b418"
+  },
+  {
+    "project": "asterra-engine",
+    "original_filename": "Asterra_Engine_Core_Design_Decisions.docx",
+    "path": "projects/asterra-engine/downloads/Asterra_Engine_Core_Design_Decisions.docx",
+    "bytes": 41544,
+    "sha256": "279d4d7770ec1b8b5862dc4c94ff0fa4fa08a85ea4d0d42242e59808ad7ec48c"
+  },
+  {
+    "project": "gork-1",
+    "original_filename": "GORK1_v2.prg",
+    "path": "projects/gork-1/downloads/GORK1_v2.prg",
+    "bytes": 5044,
+    "sha256": "03585dd779d5ac3b4ea58e725ec752173cc632f9e2177ed4543825416a4974a2"
+  }
+]
