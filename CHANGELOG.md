@@ -2,6 +2,11 @@
 
 Shared website and publishing-process changes, newest first. Project release histories live in each project's own changelog.
 
+## 2026-10-28 — C64 development player
+
+- Added /dev/c64-rpg/ player v0.1.0 and linked its changelog from the lab.
+- Kept the main project collection unchanged.
+
 ## 2026-10-28
 
 ### Added
