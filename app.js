@@ -21,6 +21,7 @@ document.querySelectorAll('[data-details]').forEach(button => {
   button.addEventListener('click', () => {
     const project = projects.find(item => item.id === button.dataset.details);
     opener = button;
+    dialog.classList.toggle('comic-preview', project.id === 'wavy-gravy');
     document.querySelector('#detail-art').src = `assets/icons/${project.id}.svg`;
     document.querySelector('#detail-art').style.objectFit = project.id === 'wavy-gravy' ? 'contain' : '';
     document.querySelector('#detail-art').alt = project.id === 'wavy-gravy' ? 'Wavy Gravy on a rainy New York street — comic teaser artwork.' : '';
