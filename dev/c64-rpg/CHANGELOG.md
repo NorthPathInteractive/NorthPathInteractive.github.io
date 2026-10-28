@@ -1,5 +1,11 @@
 # C64 RPG development player changelog
 
+## 0.1.1 — 2026-10-28
+
+- Added a Return touch key for INPUT prompts.
+- Emit touch keys directly, including Space, rather than trimming them through the action parser.
+- Give every launch a unique iframe URL so switching and restarting creates a fresh emulator.
+
 ## 0.1.0 — 2026-10-28
 
 - Added GitHub Pages development launcher for Velora full prototype, map test, Asterra test slice, GORK 1 and visibility v3.

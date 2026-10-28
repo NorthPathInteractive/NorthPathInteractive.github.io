@@ -24,7 +24,7 @@ $("start").addEventListener("click",async()=>{
   pending={cmd:"load",file_name:selected().file,file,basic_rom:basic,kernal_rom:kernal,charset_rom:charset};
   $("player").hidden=false;
   const config={openROMS:false,dialog_on_missing_roms:false,navbar:false,wide:true,border:0.3,port1:false,port2:false};
-  $("emulator").src=origin+"/#"+encodeURIComponent(JSON.stringify(config));
+  $("emulator").src=origin+"/?npi="+Date.now()+"#"+encodeURIComponent(JSON.stringify(config));
   poll=setInterval(()=>send("poll_state"),500);
   timeout=setTimeout(()=>{clearInterval(poll);pending=null;$("start").disabled=false;$("status").textContent="The emulator did not respond. Try Start again, or download the build for your C64 emulator.";},45000);
  }catch(e){$("status").textContent=e.message;$("start").disabled=false;}
@@ -37,5 +37,5 @@ window.addEventListener("message",event=>{
 $("sound").addEventListener("click",()=>{if(ready)send("toggle_audio()");});
 $("keyboard").addEventListener("click",()=>script("action('keyboard');"));
 $("fullscreen").addEventListener("click",async()=>{try{await $("player").requestFullscreen();}catch{$("status").textContent="Full screen is unavailable in this browser; rotate your device for more room.";}});
-document.querySelectorAll("[data-key]").forEach(button=>button.addEventListener("click",()=>script("action("+JSON.stringify(button.dataset.key)+");")));
+document.querySelectorAll("[data-key]").forEach(button=>button.addEventListener("click",()=>script("emit_key("+JSON.stringify(button.dataset.key)+",0,100);")));
 describe();
