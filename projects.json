@@ -84,10 +84,11 @@
     "name": "Parsec Flux",
     "group": "development",
     "cat": "games",
-    "type": "Game experiment",
-    "description": "An evolving game experiment from North Path Interactive.",
-    "url": "https://northpathinteractive.github.io/dev/parsec-flux/",
-    "action": "Try Parsec Flux"
+    "type": "Audio timing game",
+    "description": "A headphone-first timing game. Jump over moving sounds to build chords across eight evolving musical worlds.",
+    "url": "https://northpathinteractive.github.io/dev/parsec-flux/?v=0.70",
+    "action": "Play Parsec Flux",
+    "version": "0.70"
   },
   {
     "id": "minstrel",
