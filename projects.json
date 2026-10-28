@@ -116,8 +116,8 @@
     "cat": "games",
     "type": "Blackjack RPG",
     "status": "In development",
-    "version": "0.2.0",
-    "description": "Explore a pocket dungeon and battle monsters with blackjack. Smarter enemies. More hearts. One more hand.",
+    "version": "0.3.0",
+    "description": "An endless blackjack roguelike. Ante up, identify monsters and survive to bank a gold high score.",
     "url": "https://northpathinteractive.github.io/dungeon-21/",
     "action": "Play Dungeon 21"
   }
