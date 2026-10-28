@@ -120,5 +120,38 @@
     "description": "An endless blackjack roguelike. Ante up, identify monsters and survive to bank a gold high score.",
     "url": "https://northpathinteractive.github.io/dungeon-21/",
     "action": "Play Dungeon 21"
+  },
+  {
+    "id": "vaults-of-velora",
+    "name": "The Vaults of Velora",
+    "group": "development",
+    "cat": "games",
+    "type": "C64 role-playing adventure",
+    "description": "Wash ashore on Velora, choose a hero and explore a mysterious island in this early Commodore 64 RPG prototype.",
+    "url": "projects/vaults-of-velora/",
+    "action": "Explore archived builds",
+    "build": "FULL-PROTOTYPE-v2 · archived build"
+  },
+  {
+    "id": "asterra-engine",
+    "name": "Asterra Engine",
+    "group": "development",
+    "cat": "experiments",
+    "type": "Reusable C64 RPG engine",
+    "description": "A small C64 BASIC engine exploring tile worlds, independently moving characters and reusable adventure systems.",
+    "url": "projects/asterra-engine/",
+    "action": "Explore archived builds",
+    "build": "Test slice v0.2 · archived build"
+  },
+  {
+    "id": "gork-1",
+    "name": "GORK 1",
+    "group": "development",
+    "cat": "games",
+    "type": "C64 dungeon adventure",
+    "description": "Find the golden key and escape the Ruins of the Forgotten Vault in a procedural Commodore 64 dungeon prototype.",
+    "url": "projects/gork-1/",
+    "action": "Explore archived builds",
+    "build": "v2 · archived filename"
   }
 ]

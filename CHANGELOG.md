@@ -2,6 +2,12 @@
 
 Shared website and publishing-process changes, newest first. Project release histories live in each project's own changelog.
 
+## 2026-10-28 — C64 RPG archive preparation
+
+- Added In development entries and internal pages for The Vaults of Velora, Asterra Engine and GORK 1.
+- Preserved ten uploaded originals with checksums, build notes and project changelogs.
+- Retained original build labels; no release history backfill or game code changes.
+
 ## 2026-10-28
 
 ### Added
