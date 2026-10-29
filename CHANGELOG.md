@@ -2,6 +2,12 @@
 
 Shared website and publishing-process changes, newest first. Project release histories live in each project's own changelog.
 
+## 2026-10-28 — C64 Lab project page
+
+- Add C64 Lab to In development with a colourful app icon and internal project page.
+- Link the page to the working lab, describe the included prototypes and display player v0.1.3.
+- Link the authoritative C64 Lab changelog and include a short What's New summary.
+
 ## 2026-10-28 — Development player fallback route
 
 - Add /c64-rpg-dev/ as an alternate development-only route with the complete player, firmware and game assets.

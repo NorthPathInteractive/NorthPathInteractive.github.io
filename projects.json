@@ -120,5 +120,16 @@
     "description": "An endless blackjack roguelike. Ante up, identify monsters and survive to bank a gold high score.",
     "url": "https://northpathinteractive.github.io/dungeon-21/",
     "action": "Play Dungeon 21"
+  },
+  {
+    "id": "c64-lab",
+    "name": "C64 Lab",
+    "group": "development",
+    "cat": "games",
+    "type": "C64 browser emulator",
+    "description": "A browser playground for Commodore 64 RPGs. Explore recovered adventures, engine experiments and the worlds still taking shape.",
+    "url": "https://northpathinteractive.github.io/c64-rpg-dev/",
+    "action": "Open C64 Lab",
+    "version": "0.1.3"
   }
 ]

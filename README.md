@@ -22,3 +22,7 @@ Dungeon 21 is the pilot: [project page](https://northpathinteractive.github.io/p
 Historical reconstruction, bulk version changes, and changelog backfills for other projects are on hold pending Steve's review of Dungeon 21. Apply the publishing standard to future authorized work; this instruction does not authorize a retrospective audit or publication of unrelated changes.
 
 See [site changelog](CHANGELOG.md) for changes to shared publishing practices.
+
+## C64 Lab
+
+[Project page](projects/c64-lab/) · [Open the lab](c64-rpg-dev/) · [Changelog](c64-rpg-dev/CHANGELOG.md). In development; player v0.1.3.

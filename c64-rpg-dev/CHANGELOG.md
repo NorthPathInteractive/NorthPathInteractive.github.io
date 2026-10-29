@@ -1,5 +1,10 @@
 # C64 RPG development player changelog
 
+## 2026-10-28 — Project page
+
+- Add C64 Lab to the main collection under In development, with an internal project page, icon and link to this player.
+- Player remains v0.1.3; no game code or player behavior changes.
+
 ## 0.1.3 — 2026-10-28
 
 - Version player script and stylesheet URLs so updated HTML loads the matching startup code.

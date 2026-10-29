@@ -7,3 +7,5 @@ Uses the official VirtualC64Web GitHub Pages emulator in an iframe. NPI hosts th
 Game binaries are unchanged. Asterra test slice PRG is extracted from the original D64 to avoid needing a separate disk-drive ROM. Original disk archives remain in the archive preparation branch. No saves added.
 
 [Changelog](CHANGELOG.md).
+
+[North Path project page](../projects/c64-lab/) · [Open C64 Lab](./).
