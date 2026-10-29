@@ -1,6 +1,6 @@
 "use strict";
 const catalog = {
- moon: { file: "moon-moth.prg", name: "Moon Moth", notes: "A neon dream garden. Collect six stars in each of three gardens. Shadows move only when you do. No clock; take your time. Moon Moth v0.1.0.", controls: "Space to begin. W/A/S/D to float; edges wrap around. Avoid X shadows and collect * moonlight. Q to leave." },
+ moon: { file: "moon-moth-v0.1.1.prg", name: "Moon Moth", notes: "A neon dream garden. Collect six stars in each of three gardens. Shadows move only when you do. No clock; take your time. Moon Moth v0.1.1.", controls: "Space to begin. W/A/S/D to float; edges wrap around. Avoid X shadows and collect * moonlight. Q to leave." },
  velora: { file: "VELORA-FULL-PROTOTYPE-v2.prg", name: "The Vaults of Velora", notes: "Three heroes, beach exploration and Cave Goblin combat. Archived full prototype v2; unfinished adventure.", controls: "Space to begin; 1–3 to choose a hero and combat move; W/A/S/D to walk; Q to quit." },
  map: { file: "VELORA-MAP-TEST.prg", name: "Velora map test", notes: "Tile rendering and collision experiment. No complete adventure or combat.", controls: "W/A/S/D to walk; Q to quit." },
  asterra: { file: "asterra-test-slice.prg", name: "Asterra test slice", notes: "Map, wandering NPC and combat. Program extracted unchanged from the ASTERRA file on the uploaded disk image; the two supplied disks are identical.", controls: "W/A/S/D to walk; 1–3 then Return in combat; Q to quit." },

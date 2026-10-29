@@ -1,5 +1,10 @@
 # C64 RPG development player changelog
 
+## 0.1.5 — 2026-10-28
+
+- Fix Moon Moth v0.1.1: rename the star counter from reserved C64 status variable ST to LC, resolving SYNTAX ERROR IN 1000.
+- Correct the shadow screen code to display X and use a versioned PRG URL to avoid cached broken builds.
+
 ## 0.1.4 — 2026-10-28
 
 - Add Moon Moth v0.1.0, an original C64 BASIC game: collect moonlight through three wrapping gardens and avoid turn-based shadows.

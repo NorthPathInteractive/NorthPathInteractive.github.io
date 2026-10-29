@@ -2,6 +2,10 @@
 
 Shared website and publishing-process changes, newest first. Project release histories live in each project's own changelog.
 
+## 2026-10-28 — Moon Moth startup fix
+
+- Publish Moon Moth v0.1.1 fixing the reserved-variable syntax error; update C64 Lab labels to player v0.1.5.
+
 ## 2026-10-28 — Moon Moth in C64 Lab
 
 - Add original Moon Moth v0.1.0 to C64 Lab and show player v0.1.4 consistently on its project page and collection card.
