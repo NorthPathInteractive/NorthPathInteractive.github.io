@@ -1,5 +1,9 @@
 # C64 RPG development player changelog
 
+## 0.1.3 — 2026-10-28
+
+- Version player script and stylesheet URLs so updated HTML loads the matching startup code.
+
 ## 0.1.2 — 2026-10-28
 
 - Serve the player from /c64-rpg-dev/ after the nested development route returned 404.
