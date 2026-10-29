@@ -2,6 +2,11 @@
 
 Shared website and publishing-process changes, newest first. Project release histories live in each project's own changelog.
 
+## 2026-10-28 — Development player fallback route
+
+- Add /c64-rpg-dev/ as an alternate development-only route with the complete player, firmware and game assets.
+- Preserve /dev/c64-rpg/ and the unchanged main project collection while investigating the nested route 404.
+
 ## 2026-10-28 — Static publishing fix
 
 - Disable Jekyll processing for this static HTML/CSS/JavaScript site, publishing the repository files directly.
