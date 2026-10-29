@@ -2,6 +2,11 @@
 
 Shared website and publishing-process changes, newest first. Project release histories live in each project's own changelog.
 
+## 2026-10-28 — Static publishing fix
+
+- Disable Jekyll processing for this static HTML/CSS/JavaScript site, publishing the repository files directly.
+- Republish the C64 development player and its assets without template processing.
+
 ## 2026-10-28 — C64 development player
 
 - Added /dev/c64-rpg/ player v0.1.1 and linked its changelog from the lab.
