@@ -2,6 +2,7 @@
 
 ## 0.1.5 — 2026-10-28
 
+- Update the player script cache key so the corrected Moon Moth filename and labels are used.
 - Fix Moon Moth v0.1.1: rename the star counter from reserved C64 status variable ST to LC, resolving SYNTAX ERROR IN 1000.
 - Correct the shadow screen code to display X and use a versioned PRG URL to avoid cached broken builds.
 
