@@ -8,7 +8,7 @@ const catalog = {
 };
 const $ = id => document.getElementById(id);
 const origin = "https://vc64web.github.io";
-let ready = false, poll, timeout, generation = 0, pending;
+let ready = false, poll, timeout, generation = 0, pending, phase;
 function selected() { return catalog[$("build").value]; }
 function describe() { const b=selected(); $("name").textContent=b.name; $("notes").textContent=b.notes; $("controls").textContent=b.controls; $("download").href="builds/"+b.file; }
 function send(message) { $("emulator").contentWindow.postMessage(message, origin); }
@@ -16,7 +16,7 @@ function script(value) { if(ready) send({cmd:"script",script:value}); }
 async function bytes(path) { const response=await fetch(path); if(!response.ok) throw new Error("Could not load "+path+" ("+response.status+")"); return new Uint8Array(await response.arrayBuffer()); }
 $("build").addEventListener("change",describe);
 $("start").addEventListener("click",async()=>{
- const current=++generation; ready=false; pending=null; clearInterval(poll);clearTimeout(timeout);
+ const current=++generation; ready=false; pending=null; phase="starting"; clearInterval(poll);clearTimeout(timeout);
  $("status").textContent="Loading "+selected().name+"…"; $("start").disabled=true;
  try {
   const [file,basic,kernal,charset]=await Promise.all([bytes("builds/"+selected().file),bytes("roms/basic-901226-01.bin"),bytes("roms/kernal-901227-03.bin"),bytes("roms/chargen-901225-01.bin")]);
@@ -31,8 +31,18 @@ $("start").addEventListener("click",async()=>{
 });
 window.addEventListener("message",event=>{
  if(event.origin!==origin||event.source!==$("emulator").contentWindow||event.data?.msg!=="render_run_state"||!pending)return;
- const payload=pending;pending=null;clearInterval(poll);clearTimeout(timeout);ready=true;
- send(payload);$("start").disabled=false;$("status").textContent="Build sent to the C64. The first screen may take a few seconds. Tap Space to begin.";
+ if(phase === "starting") {
+  phase="firmware";
+  const {basic_rom,kernal_rom,charset_rom}=pending;
+  send({cmd:"load",basic_rom,kernal_rom,charset_rom});
+  $("status").textContent="Starting the C64 with its system firmware…";
+  send({cmd:"script",script:"try { wasm_run(); } catch (e) {}"});
+  return;
+ }
+ if(phase !== "firmware" || !event.data.value)return;
+ phase="game";
+ const {file_name,file}=pending;pending=null;clearInterval(poll);clearTimeout(timeout);ready=true;
+ send({cmd:"load",file_name,file});$("start").disabled=false;$("status").textContent="Build sent to the running C64. Tap Space once the title appears.";
 });
 $("sound").addEventListener("click",()=>{if(ready)send("toggle_audio()");});
 $("keyboard").addEventListener("click",()=>script("action('keyboard');"));

@@ -1,5 +1,10 @@
 # C64 RPG development player changelog
 
+## 0.1.2 — 2026-10-28
+
+- Serve the player from /c64-rpg-dev/ after the nested development route returned 404.
+- Load system firmware and wait for a running C64 before inserting the game program.
+
 ## 0.1.1 — 2026-10-28
 
 - Added a Return touch key for INPUT prompts.
