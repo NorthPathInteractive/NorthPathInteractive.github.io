@@ -25,4 +25,4 @@ See [site changelog](CHANGELOG.md) for changes to shared publishing practices.
 
 ## C64 Lab
 
-[Project page](projects/c64-lab/) · [Open the lab](c64-rpg-dev/) · [Changelog](c64-rpg-dev/CHANGELOG.md). In development; player v0.1.3.
+[Project page](projects/c64-lab/) · [Open the lab](c64-rpg-dev/) · [Changelog](c64-rpg-dev/CHANGELOG.md). In development; player v0.1.4.

@@ -2,6 +2,10 @@
 
 Shared website and publishing-process changes, newest first. Project release histories live in each project's own changelog.
 
+## 2026-10-28 — Moon Moth in C64 Lab
+
+- Add original Moon Moth v0.1.0 to C64 Lab and show player v0.1.4 consistently on its project page and collection card.
+
 ## 2026-10-28 — C64 Lab project page
 
 - Add C64 Lab to In development with a colourful app icon and internal project page.

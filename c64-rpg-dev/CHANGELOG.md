@@ -1,5 +1,11 @@
 # C64 RPG development player changelog
 
+## 0.1.4 — 2026-10-28
+
+- Add Moon Moth v0.1.0, an original C64 BASIC game: collect moonlight through three wrapping gardens and avoid turn-based shadows.
+- Include original BASIC source, compiled PRG and direct game-selection links.
+- Keep previous archived builds unchanged.
+
 ## 2026-10-28 — Project page
 
 - Add C64 Lab to the main collection under In development, with an internal project page, icon and link to this player.
