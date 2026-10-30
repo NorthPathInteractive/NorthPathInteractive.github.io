@@ -41,6 +41,19 @@ window.DungeonAudio = (() => {
       next += beat; step++;
     }
   }
+  function resetClock() {
+    active = ''; next = ctx.currentTime + .03; fanfareUntil = 0;
+    music.gain.cancelScheduledValues(ctx.currentTime);
+    music.gain.setValueAtTime(.65, ctx.currentTime);
+    tick();
+  }
+  function recover() {
+    if (!enabled || !ctx || document.hidden || ctx.state === 'running') return;
+    // Invoke resume directly inside the gesture, before any asynchronous work.
+    Promise.resolve(ctx.resume()).then(() => {
+      if (enabled && ctx.state === 'running') resetClock();
+    }).catch(() => {});
+  }
   async function enable(value) {
     enabled = value;
     if (!value) {
@@ -48,7 +61,9 @@ window.DungeonAudio = (() => {
       return false;
     }
     try {
-      if (!ctx) {
+      // Playback sessions avoid Safari treating the soundtrack as ambient audio.
+      try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch {}
+      if (!ctx || ctx.state === 'closed') {
         const Audio = window.AudioContext || window.webkitAudioContext;
         if (!Audio) throw new Error('Web Audio unavailable');
         ctx = new Audio(); master = ctx.createGain(); master.gain.value = .55;
@@ -57,10 +72,21 @@ window.DungeonAudio = (() => {
         music.connect(master); effects.connect(master); master.connect(ctx.destination);
         noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
         const data = noise.getChannelData(0); for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+        if (timer) clearInterval(timer);
         timer = setInterval(tick, 30);
+        ctx.onstatechange = () => {
+          if (enabled && ctx.state === 'running' && !document.hidden) resetClock();
+        };
       }
       master.gain.setValueAtTime(.55, ctx.currentTime);
-      await ctx.resume(); active = ''; next = ctx.currentTime + .03; tick(); return true;
+      const resumed = ctx.resume();
+      // Some mobile browsers leave resume pending until another gesture.
+      // Keep Power On responsive so the user can retry instead of getting stuck.
+      let timeout;
+      try { await Promise.race([resumed, new Promise(resolve => { timeout = setTimeout(resolve, 1200); })]); }
+      finally { clearTimeout(timeout); }
+      if (ctx.state !== 'running') { enabled = false; return false; }
+      resetClock(); return true;
     } catch { enabled = false; return false; }
   }
   function play(name) { if (theme !== name) { theme = name; active = ''; } tick(); }
@@ -87,7 +113,12 @@ window.DungeonAudio = (() => {
   document.addEventListener('visibilitychange', () => {
     if (!ctx || !enabled) return;
     if (document.hidden) ctx.suspend().catch(()=>{});
-    else ctx.resume().then(()=>{ active = ''; next = ctx.currentTime + .03; tick(); }).catch(()=>{});
+    else recover();
   });
+  // Reacquire audio focus after lock-screen, phone-call and tab interruptions.
+  document.addEventListener('pointerdown', recover, { passive: true });
+  document.addEventListener('keydown', recover);
+  window.addEventListener('pageshow', recover);
+  window.addEventListener('focus', recover);
   return { enable, play, effect };
 })();

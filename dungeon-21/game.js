@@ -35,7 +35,7 @@ function fx(name) { sound?.effect(name); }
 function flash(name) { document.body.classList.remove('enemy-hit','player-hurt');void document.body.offsetWidth;document.body.classList.add(name);setTimeout(()=>document.body.classList.remove(name),600); }
 async function setSound(on) { const ok=await sound?.enable(on);muted=!ok;$('sound').textContent=muted?'SOUND OFF':'SOUND ON';$('sound').setAttribute('aria-pressed',String(!muted));return ok; }
 function startGame() { started=true;$('titleScreen').hidden=true;$('playScreen').hidden=false;render();$('actions').querySelector('button')?.focus(); }
-function titleReady() { const b=$('powerOn');b.textContent=state.depth>0?'CONTINUE RUN →':'START ADVENTURE →';b.onclick=startGame;$('titleHint').textContent=muted?'Sound is off. You can still play.':'Title theme · Original pocket chiptune';b.focus(); }
+function titleReady() { const b=$('powerOn');b.textContent=state.depth>0?'CONTINUE RUN →':'START ADVENTURE →';b.onclick=startGame;$('titleHint').textContent=muted?'Sound is off. Tap SOUND OFF to retry audio.':'Title theme · Original pocket chiptune';b.focus(); }
 $('powerOn').onclick=async()=>{await setSound(true);titleReady();};
 $('silentStart').onclick=()=>{setSound(false);startGame();};
 $('savedHint').textContent=state.depth>0?'YOUR SAVED RUN IS READY.':'10 HEALTH. 20 GOLD. HOW FAR CAN YOU GO?';

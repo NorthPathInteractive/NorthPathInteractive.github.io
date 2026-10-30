@@ -2,6 +2,15 @@
 
 Changes are listed newest first. Dates use America/Toronto time.
 
+## 0.3.1 — 2026-10-29
+
+### Fixed
+- Recover paused audio on the next tap or key press after a phone, lock-screen or tab interruption.
+- Request a playback audio session where supported, so the soundtrack is not treated as ambient audio.
+- Keep Power On responsive if the browser cannot resume audio; show how to retry with the Sound button.
+- Refresh game, music and stylesheet cache labels together with the displayed version.
+- Preserve current saved runs and local high scores.
+
 ## [0.3.0] — 2026-10-28
 
 ### Added
