@@ -2,6 +2,14 @@
 
 Changes are listed newest first. Dates use America/Toronto time.
 
+## 0.11.0 — 2026-10-30
+
+### Changed
+- Discover the route down through random gem-coloured door rooms. Attempting a locked door reveals its required key without spending gold.
+- Removed next-key prices and directions from the hall HUD, Status, story and hall-entry text. Shop listings reveal prices when encountered.
+- The Ruby Door stands out in red against Emerald stonework; the shop's Red Key listing uses red text, including when unaffordable.
+- Existing saves, key prices, room probabilities and hall progression are preserved.
+
 ## 0.10.0 — 2026-10-30
 
 ### Added

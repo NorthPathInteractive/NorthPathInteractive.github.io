@@ -37,6 +37,10 @@ function validRun(r) {
 }
 try { const s=JSON.parse(localStorage.getItem(KEY)); if(s?.version===3&&s.run){if(s.run.healing===undefined)s.run.healing=0;if(s.run.tally===undefined){s.run.tally=newTally();s.run.startedAt=Date.now();s.run.trackingSinceUpdate=true;}} state=s?.version===3&&validRun(s.run)?s.run:fresh(); }
 catch { state=fresh(); storageOK=false; }
+// Retire explicit route hints stored by earlier releases without changing quest progress.
+if(state.stage==='stairs'&&/^(The gate needs|Your .* key fits)/.test(state.note))state.note=`A ${doorName().toLowerCase()} breaks the familiar stonework. Cold air stirs beneath it. Where does it lead?`;
+if(state.stage==='explore'&&/^.* Hall\. Find the merchant, buy/.test(state.note))state.note=`${hall().name} Hall. Unfamiliar shadows gather ahead. Explore carefully.`;
+if(state.stage==='shop'&&/^The merchant offers a .* key for/.test(state.note))state.note='The merchant unfolds a velvet cloth. Strange keys and bottled remedies catch the light.';
 function save() { try { localStorage.setItem(KEY,JSON.stringify({version:3,run:state})); } catch { storageOK=false; } }
 function score(hand) { let n=0,a=0; for(const c of hand){n+=c.r==='A'?11:['J','Q','K'].includes(c.r)?10:Number(c.r);if(c.r==='A')a++;}while(n>21&&a){n-=10;a--;}return n; }
 function natural(h) { return h.length===2&&score(h)===21; }
@@ -75,6 +79,7 @@ const rooms = {
   trap: {name:'DART GALLERY',hint:'A quiet click. Then a sharp sting.'},
   quiet: {name:'ECHO CHAMBER',hint:'Your footsteps return one beat too late.'}
 };
+function doorName(){return state.hall<3?HALLS[state.hall+1].name+' Door':'Amethyst Door';}
 function explore() {
   if(state.stage!=='explore'||state.outcome||inventoryOpen||statusOpen)return;
   $('playContent').scrollTop=0;
@@ -87,9 +92,9 @@ function explore() {
     else { state.identify++;state.note='A stoppered glass eye rests in the chest. Identify potion +1. Its knowledge lasts for this run.'; }
     fx('treasure');
   } else if(roll<.30) {
-    state.sinceShop=0;state.room='shop';state.stage='shop';state.note=`The merchant offers a ${hall().key} key for ${hall().cost} gold. ${state.key?'You already carry it.':'It opens this hall’s gate.'}`;
+    state.sinceShop=0;state.room='shop';state.stage='shop';state.note='The merchant unfolds a velvet cloth. Strange keys and bottled remedies catch the light.';
   } else if(roll<.38) {
-    state.room='stairs';state.stage='stairs';state.note=state.key?`Your ${hall().key} key fits the lock. Descend when ready.`:`The gate needs the ${hall().key} key. Seek the merchant (${hall().cost} gold).`;
+    state.room='stairs';state.stage='stairs';state.note=`A ${doorName().toLowerCase()} breaks the familiar stonework. Cold air stirs beneath it. Where does it lead?`;
   } else if(roll<.43) {
     state.room='fountain';const healed=Math.min(3,state.max-state.hp);state.hp+=healed;state.tally.healed+=healed;
     state.note=healed?`You drink from the whispering fountain. +${healed} health.`:'The water is cold and clear. You already have full health.';fx('heal');
@@ -249,7 +254,7 @@ function highlightChanges(element,text) {
 function toggleStatus(){if(!started)return;inventoryOpen=false;statusOpen=!statusOpen;renderStatus();renderInventory();if(statusOpen)$('closeStatusTop').focus();else $('actions').querySelector('button')?.focus();}
 function renderStatus(){
   $('statusDetails').replaceChildren();
-  const rows=[['Hall',`${state.hall+1}/4 · ${hall().name}`],['Health',`${state.hp}/${state.max}♥`],['Gold',`${state.gold}G`],['Rooms explored',state.depth],['Monsters defeated',state.kills],['Defeated in this hall',state.hallKills],['Key carried',state.key?hall().key+' key':'None'],['Next gate',state.final?'Final chamber unlocked':state.key?'Key ready':hall().key+' key · '+hall().cost+'G'],['Gold still needed',state.key||state.final?'0G':Math.max(0,hall().cost-state.gold)+'G'],['Healing potions',state.healing],['Identify potions',state.identify],['Known enemy types/levels',state.known.length],['Hands won / lost / tied',`${state.tally.wins} / ${state.tally.losses} / ${state.tally.ties}`],['Damage taken',`${state.tally.damage}♥`],['Health restored',`${state.tally.healed}♥`],['Escapes',state.tally.fled],['Current ante',state.enemy?state.enemy.ante+'G':'No battle'],['Your committed stake',state.pot+'G'],['Explorations since shop',state.sinceShop],['Hall password',hall().name.toUpperCase()],['Run mode',state.admin?'ADMIN TEST · not ranked':'Normal · ranked locally'],['Tracked time',Math.max(0,Math.floor((Date.now()-state.startedAt)/60000))+' minutes'],['Save',storageOK?'Saved on this browser':'Storage unavailable']];
+  const rows=[['Hall',`${state.hall+1}/4 · ${hall().name}`],['Health',`${state.hp}/${state.max}♥`],['Gold',`${state.gold}G`],['Rooms explored',state.depth],['Monsters defeated',state.kills],['Defeated in this hall',state.hallKills],['Key carried',state.key?hall().key+' key':'None'],['Healing potions',state.healing],['Identify potions',state.identify],['Known enemy types/levels',state.known.length],['Hands won / lost / tied',`${state.tally.wins} / ${state.tally.losses} / ${state.tally.ties}`],['Damage taken',`${state.tally.damage}♥`],['Health restored',`${state.tally.healed}♥`],['Escapes',state.tally.fled],['Current ante',state.enemy?state.enemy.ante+'G':'No battle'],['Your committed stake',state.pot+'G'],['Explorations since shop',state.sinceShop],['Hall password',hall().name.toUpperCase()],['Run mode',state.admin?'ADMIN TEST · not ranked':'Normal · ranked locally'],['Tracked time',Math.max(0,Math.floor((Date.now()-state.startedAt)/60000))+' minutes'],['Save',storageOK?'Saved on this browser':'Storage unavailable']];
   for(const [label,value] of rows){const row=document.createElement('div'),dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=String(value);row.append(dt);row.append(dd);$('statusDetails').append(row);}
   $('statusNote').textContent=state.trackingSinceUpdate?'Room and kill counts cover your existing run. Hand results, damage, healing and tracked time start from the v0.8.0 update.':'Stats cover this quest. High scores use the gold remaining when it ends.';
 }
@@ -275,17 +280,17 @@ function recordScore(event) {
 function menu(name,text){$('titleScreen').hidden=true;$('playScreen').hidden=true;$('menuScreen').hidden=false;$('menuTitle').textContent=name;$('menuText').textContent=text;$('codeForm').hidden=true;$('menuScores').hidden=true;$('menuActions').replaceChildren();}
 function menuButton(label,fn){const b=document.createElement('button');b.textContent=label;b.onclick=fn;$('menuActions').append(b);}
 function backTitle(){clearTimeout(monsterTimer);clearTimeout(moveTimer);$('moveBanner').hidden=true;started=false;inventoryOpen=false;statusOpen=false;$('savedHint').textContent=`${state.admin?'ADMIN · ':''}${HALLS[state.hall].name.toUpperCase()} · ${state.hp}♥ · ${state.gold}G`;$('menuScreen').hidden=true;$('playScreen').hidden=true;$('titleScreen').hidden=false;applyPalette();render();}
-function showStory(){menu('THE KING’S REQUEST',`“A great hero must descend into the Halls of the Obsidian Veil,” the king tells you. “The journey will be cruel. Four halls lie below my kingdom. Buy each hall’s key, find its sealed stair, and descend. Only beyond the last lock will the final chamber and our buried secret be revealed.” He gives you five gold pieces. “Spend wisely. Return with the truth.”${state.hall||state.admin?' Your password begins this quest in '+hall().name+' Hall with '+state.gold+' gold.':''}`);menuButton('BEGIN THE QUEST →',()=>{state.storySeen=true;save();enterPlay();});menuButton('BACK',backTitle);}
+function showStory(){menu('THE KING’S REQUEST',`“A great hero must descend into the Halls of the Obsidian Veil,” the king tells you. “The journey will be cruel. Four halls lie below my kingdom. Find your own way through their forgotten rooms. The path downward will not reveal itself easily. Only beyond the last lock will the final chamber and our buried secret be revealed.” He gives you five gold pieces. “Spend wisely. Return with the truth.”${state.hall||state.admin?' Your password begins this quest in '+hall().name+' Hall with '+state.gold+' gold.':''}`);menuButton('BEGIN THE QUEST →',()=>{state.storySeen=true;save();enterPlay();});menuButton('BACK',backTitle);}
 const CODES={emerald:[0,false],ruby:[1,false],sapphire:[2,false],amethyst:[3,false],gold:[0,true],goldruby:[1,true],goldsapphire:[2,true],goldamethyst:[3,true]};
 function submitCode(event){event?.preventDefault();const code=$('codeInput').value.trim().toLowerCase();const entry=CODES[code];if(!entry){$('codeFeedback').textContent='Unknown password. Try again.';return;}if(state.depth>0&&!['dead','won'].includes(state.stage)&&!confirm('Replace your saved quest with this password start?'))return;state=fresh(...entry);save();$('codeInput').value='';applyPalette();showStory();}
 $('codeForm').onsubmit=submitCode;
 $('enterCode').onclick=()=>{menu('ENTER PASSWORD','Hall passwords start a new quest at that hall. Codes ignore capital letters.');$('codeForm').hidden=false;$('codeFeedback').textContent='';menuButton('BACK',backTitle);$('codeInput').focus();};
 $('viewScores').onclick=()=>{menu('HIGH SCORES','The richest survivors of the Obsidian Veil. STARTER entries are fictional. Admin runs are not ranked.');renderScores();$('menuScores').hidden=false;menuButton('BACK',backTitle);};
-function buyKey(){if(state.stage!=='shop'||state.key||state.gold<hall().cost)return;state.gold-=hall().cost;state.key=true;state.note=`You buy the ${hall().key} key. Seek this hall’s sealed stair.`;fx('treasure');render();}
+function buyKey(){if(state.stage!=='shop'||state.key||state.gold<hall().cost)return;state.gold-=hall().cost;state.key=true;state.note=`You buy the ${hall().key} key. Its teeth are cold against your palm.`;fx('treasure');render();}
 function buyIdentify(){if(state.stage!=='shop'||state.gold<5)return;if(!confirm('Buy 1 Identify potion for 5 gold?'))return;state.gold-=5;state.identify++;state.note='Identify potion +1. Spent 5 gold.';fx('treasure');render();}
 function leaveRoom(){if(!['shop','stairs'].includes(state.stage))return;state.stage='explore';state.note='You return to the passages.';render();}
-function descend(){if(state.stage!=='stairs'||!state.key)return;state.key=false;state.enemy=null;state.outcome=null;state.player=[];state.foe=[];state.pot=0;if(state.hall===3){state.final=true;state.stage='final';state.room='final';state.note='The amethyst lock melts into light. Beneath a glistening crystal sky, the Crownless King guards the final secret. A battle costs 8 gold per hand.';}else{state.hall++;state.hallKills=0;state.sinceShop=0;state.stage='checkpoint';state.room='stairs';state.note=`You descend into ${hall().name} Hall. PASSWORD: ${hall().name.toUpperCase()}. Remember it to start a future quest here. Your health, gold and inventory carry onward.`;}fx('heal');render();}
-function enterHall(){if(state.stage!=='checkpoint')return;state.stage='explore';state.note=`${hall().name} Hall. Find the merchant, buy the ${hall().key} key (${hall().cost} gold), and seek the sealed stair.`;render();}
+function descend(){if(state.stage!=='stairs')return;if(!state.key){state.note=`Requires ${hall().key} Key. The lock will not turn.`;render();return;}state.key=false;state.enemy=null;state.outcome=null;state.player=[];state.foe=[];state.pot=0;if(state.hall===3){state.final=true;state.stage='final';state.room='final';state.note='The amethyst lock melts into light. Beneath a glistening crystal sky, the Crownless King guards the final secret. A battle costs 8 gold per hand.';}else{state.hall++;state.hallKills=0;state.sinceShop=0;state.stage='checkpoint';state.room='stairs';state.note=`You descend into ${hall().name} Hall. PASSWORD: ${hall().name.toUpperCase()}. Remember it to start a future quest here. Your health, gold and inventory carry onward.`;}fx('heal');render();}
+function enterHall(){if(state.stage!=='checkpoint')return;state.stage='explore';state.note=`${hall().name} Hall. Unfamiliar shadows gather ahead. Explore carefully.`;render();}
 function battleBoss(){if(state.stage!=='final')return;state.enemy={index:0,boss:true,level:5,hearts:6,left:6,damage:4,ante:8};state.player=[];state.foe=[];state.stage='explore';deal();}
 function applyPalette(){const colors=state.final?['#201733','#65527e','#bbc1ed','#fff9e4']:hall().colors;['--dark','--mid','--light','--pale'].forEach((name,i)=>document.documentElement.style.setProperty(name,colors[i]));document.body.classList.toggle('amethyst',state.hall===3);document.body.classList.toggle('final-room',state.final);$('themeMeta').setAttribute('content',colors[3]);}
 $('scoreForm').onsubmit=recordScore;
@@ -298,8 +303,8 @@ function render() {
   document.body.classList.toggle('battle',combat);document.body.classList.toggle('in-shop',state.stage==='shop');document.body.classList.toggle('has-key',state.key);
   $('health').textContent=`♥ ${state.hp}/${state.max}`;$('gold').textContent=`${state.gold}G`;
   $('depth').textContent=`ROOM ${String(state.depth).padStart(2,'0')}`;$('level').textContent=`${hall().name.toUpperCase()}${state.admin?' · ADMIN':''}`;
-  $('inventory').textContent=state.final?'LAST GATE OPEN':state.key?hall().key.toUpperCase()+' KEY READY':hall().key.toUpperCase()+' KEY · '+hall().cost+'G';
-  $('title').textContent=state.stage==='dead'?'GAME OVER':state.stage==='won'?'DAWN RESTORED':m?m.name:rooms[state.room]?.name||'THE QUIET HALL';
+  $('inventory').textContent=state.key?hall().key.toUpperCase()+' KEY':'';$('inventory').hidden=!state.key;
+  $('title').textContent=state.stage==='dead'?'GAME OVER':state.stage==='won'?'DAWN RESTORED':m?m.name:state.room==='stairs'?doorName().toUpperCase():rooms[state.room]?.name||'THE QUIET HALL';
   $('subtitle').textContent=m?`${'♥'.repeat(state.enemy.left)} · `+(identified()?`LV ${state.enemy.level} · ${behavior(state.enemy)}`:'Not identified'):rooms[state.room]?.hint||'The Obsidian Veil. Every gold piece counts.';
   $('stakes').textContent=state.enemy?`ANTE ${state.enemy.ante}G / HAND · `+(['play','monster'].includes(state.stage)?`POT ${state.pot*2}G`:'WIN RETURNS '+state.enemy.ante*2+'G'):'';
   const outcome=state.outcome&&state.stage!=='play'?state.outcome:null;
@@ -312,8 +317,8 @@ function render() {
   if(state.stage==='explore'&&!outcome){button('EXPLORE →',explore,'e');button('STATUS',toggleStatus);}
   if(state.stage==='explore'&&outcome){button('CONTINUE →',dismissOutcome,'e');}
 
-  if(state.stage==='shop'){if(!state.key){button(`${hall().key.toUpperCase()} KEY · ${hall().cost}G`,buyKey);$('actions').children[$('actions').children.length-1].disabled=state.gold<hall().cost;}button('IDENTIFY · 5G',buyIdentify);$('actions').children[$('actions').children.length-1].disabled=state.gold<5;button('HEAL POTION · 5G',buyHealing);$('actions').children[$('actions').children.length-1].disabled=state.gold<5;button('LEAVE →',leaveRoom,'e');}
-  if(state.stage==='stairs'){if(state.key)button(state.hall===3?'UNLOCK FINAL CHAMBER':'DESCEND →',descend);button('LEAVE →',leaveRoom,'e');}
+  if(state.stage==='shop'){if(!state.key){button(`${hall().key.toUpperCase()} KEY · ${hall().cost}G`,buyKey);const keyButton=$('actions').children[$('actions').children.length-1];keyButton.disabled=state.gold<hall().cost;if(state.hall===0)keyButton.className='red-key';}button('IDENTIFY · 5G',buyIdentify);$('actions').children[$('actions').children.length-1].disabled=state.gold<5;button('HEAL POTION · 5G',buyHealing);$('actions').children[$('actions').children.length-1].disabled=state.gold<5;button('LEAVE →',leaveRoom,'e');}
+  if(state.stage==='stairs'){button(state.hall===3?'OPEN AMETHYST DOOR →':`DESCEND TO ${HALLS[state.hall+1].name.toUpperCase()} HALL →`,descend);button('LEAVE →',leaveRoom,'e');}
   if(state.stage==='checkpoint')button('ENTER HALL →',enterHall,'e');
   if(state.stage==='final')button('FACE THE KING · 8G',battleBoss,'e');
   if(state.stage==='room'){button('TOUCH ALTAR',()=>altar(true));button('LEAVE →',()=>altar(false),'e');}
@@ -325,7 +330,7 @@ function render() {
   const ended=['dead','won'].includes(state.stage);$('scoreEntry').hidden=!ended;$('scoreForm').hidden=state.recorded||state.admin;$('endingScores').hidden=!ended;
   $('finalScore').textContent=`${state.gold}G`;
   $('scoreFeedback').textContent=state.admin?'ADMIN TEST RUN — not ranked.':state.recorded?'Score saved on this device.':ended?'Enter up to 3 initials to record your score.':'';
-  $('art').setAttribute('aria-label',m?m.name+' encounter':rooms[state.room]?.name||'A long dungeon hall with stone columns');
+  $('art').setAttribute('aria-label',m?m.name+' encounter':state.room==='stairs'?doorName()+' in the '+hall().name+' Hall':rooms[state.room]?.name||'A long dungeon hall with stone columns');
   draw(m?m.sprite:-1,state.room);save();renderScores();renderStatus();renderInventory();scheduleMonster();
 }
 function restart(){clearTimeout(monsterTimer);clearTimeout(moveTimer);$('moveBanner').hidden=true;inventoryOpen=false;statusOpen=false;state=fresh();$('initials').value='';save();started=false;backTitle();showStory();}
@@ -357,7 +362,15 @@ function drawRoom(c,room) {
   for(let y=51;y<72;y+=8)r(0,y,160,1,shade);
   const column=x=>{r(x,0,13,48,ink);r(x+3,3,6,41,moss);r(x-3,0,19,4,ink);r(x-4,44,21,5,ink);};
   const candle=(x,y)=>{r(x,y,3,11,moss);r(x-2,y+10,7,2);r(x,y-5,3,4,glow);r(x+1,y-8,1,3,glow);};
-  if(room==='stairs') {for(let i=0;i<8;i++){r(35-i*3,9+i*7,90+i*6,6,i%2?shade:ink);r(35-i*3,9+i*7,90+i*6,1,moss);}r(74,1,12,6,glow);return;}
+  if(room==='stairs') {
+    // Gem-coloured doors interrupt the current hall's stone palette.
+    const gem=state.hall===0?['#390f20','#a5263e','#ed6370','#ffd4a4']:state.hall===1?['#0a204b','#285eab','#72c9ee','#defaff']:['#241537','#60449a','#b09be7','#f5edff'];
+    column(14);column(133);r(44,5,72,57,ink);r(48,8,64,52,gem[0]);r(52,11,56,47,gem[1]);
+    r(52,11,56,3,gem[2]);r(52,14,3,44,gem[2]);r(78,14,3,44,gem[0]);
+    for(const x of [58,85]){r(x,19,17,15,gem[0]);r(x+2,21,13,11,gem[1]);r(x,40,17,11,gem[0]);r(x+2,42,13,7,gem[1]);}
+    r(71,34,4,4,gem[3]);r(84,34,4,4,gem[3]);r(76,38,8,8,gem[0]);r(78,40,4,3,gem[3]);r(79,43,2,3,gem[3]);
+    r(38,59,84,4,shade);r(30,63,100,4,ink);r(25,67,110,3,moss);return;
+  }
   if(room==='shop') {for(let i=0;i<8;i++)r(15+i*16,7,16,13,i%2?ink:moss);r(20,48,120,18);r(24,47,112,4,moss);r(72,25,16,17,moss);r(74,30,4,3);r(82,30,4,3);r(65,42,30,7,shade);r(30,31,4,14,glow);r(30,31,14,4,glow);r(41,35,3,5,glow);r(114,33,9,12,moss);r(116,29,5,4,moss);return;}
   if(room==='final') {r(0,0,160,72,ink);for(let i=0;i<8;i++){const x=5+i*20;for(let y=0;y<35;y++)r(x-Math.floor(y/8),20+y,3+Math.floor(y/4),1,i%2?moss:shade);}r(45,42,70,5,moss);r(50,47,60,18,shade);r(66,32,28,18,glow);r(68,25,5,12,glow);r(78,20,5,16,glow);r(88,25,5,12,glow);for(const [x,y] of [[16,9],[40,22],[119,12],[145,29],[108,58]]){r(x,y,1,7,glow);r(x-3,y+3,7,1,glow);}return;}
   if(room==='fountain') {

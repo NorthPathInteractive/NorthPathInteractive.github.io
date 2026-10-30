@@ -1,6 +1,6 @@
 # Dungeon 21
 
-Playable blackjack dungeon quest, v0.10.0. In development.
+Playable blackjack dungeon quest, v0.11.0. In development.
 
 [Play the game](https://northpathinteractive.github.io/dungeon-21/) · [Project page](https://northpathinteractive.github.io/projects/dungeon-21/) · [CHANGELOG.md](CHANGELOG.md)
 
@@ -75,3 +75,7 @@ Version 0.9.1 fixes stale asset references; the monster-turn review appears abov
 Player and monster moves display matching actor-labelled HIT/STAND banners. The monster reveals its hand and takes hits one card at a time, with running totals, at 1.2-second intervals. Next Move advances manually; Show Result is available after the final stand/bust. Inventory and backgrounding pause progression. Pending frames save without rerolling or repeating payouts. Reduced-motion preferences remove the sliding banner animation.
 
 The two short voice assets in audio/ were generated locally with Flite and processed with a 14-band synthetic-carrier vocoder, retaining some dry speech for intelligibility. They contain only “Hit” and “Stand”, are loaded locally, and follow the existing Sound setting. The original chiptune music/effects remain procedural.
+
+## Door discovery (v0.11.0)
+
+The hall HUD, Status, story and entry text do not reveal the next key or its price. Random door rooms keep the existing 8% chance. Try Descend to learn the required key; failure spends nothing. Shops list key prices. The Ruby Door has red panels surrounded by Emerald stonework, and the Red Key shop button remains red even when unaffordable. Existing saves, carried keys and door-room states remain compatible.
