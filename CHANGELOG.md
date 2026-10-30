@@ -2,6 +2,12 @@
 
 Shared website and publishing-process changes, newest first. Project release histories live in each project's own changelog.
 
+## 2026-10-29 — Driftloom project introduction
+
+- Add Driftloom to In development and the Music & audio filter, with a square orbital-thread icon.
+- Add an internal project page describing Orbital Drift, the collaborative music workflow and planned animation.
+- Link the project changelog and distinguish the existing composition from the public app still in development.
+
 ## 2026-10-28 — Moon Moth startup fix
 
 - Publish Moon Moth v0.1.1 fixing the reserved-variable syntax error; update C64 Lab labels to player v0.1.5.
