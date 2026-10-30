@@ -1,6 +1,6 @@
 # Dungeon 21
 
-Playable blackjack dungeon quest, v0.14.0. In development.
+Playable blackjack dungeon quest, v0.15.0. In development.
 
 [Play the game](https://northpathinteractive.github.io/dungeon-21/) · [Project page](https://northpathinteractive.github.io/projects/dungeon-21/) · [CHANGELOG.md](CHANGELOG.md)
 
@@ -99,3 +99,7 @@ The player keeps the original vocoded HIT/STAND samples. Each of the 18 monster 
 ## Attribute feedback (v0.14.0)
 
 Only signed, actual changes receive emphasis in room/battle descriptions. Possible payouts, prices, required keys and item counts stay plain. The Red Key shop listing retains its intentional red item styling. Actual gold/health balance changes flash in the player hand area, result screen or room; these announcements are computed from balance changes between renders, never from a quoted cost. Loading or redrawing a save does not replay a change. The loss result describes the forfeited ante plainly because gold was already deducted on the deal. Damage text uses the actual health lost, capped at remaining health.
+
+## Hall exploration music (v0.15.0)
+
+Emerald retains its original sparse 72 BPM exploration theme. Ruby introduces an 88 BPM expedition march; Sapphire adds rolling minor-key arpeggios and a pulse at 104 BPM; Amethyst rises into a fuller 120 BPM final-hall adventure. Each new theme has its own 64-step lead, bass and harmony. Hall changes and password starts select the right theme. The title, battle, fanfare, effects and voices are unchanged.

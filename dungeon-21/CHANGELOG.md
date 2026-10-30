@@ -2,6 +2,13 @@
 
 Changes are listed newest first. Dates use America/Toronto time.
 
+## 0.15.0 — 2026-10-30
+
+### Added
+- Separate exploration music for Ruby, Sapphire and Amethyst, progressing from an expedition march to rolling arpeggios and a fuller final-hall adventure.
+- The new themes build in pace: Ruby 88 BPM, Sapphire 104 BPM, Amethyst 120 BPM.
+- Emerald’s original 72 BPM exploration theme, title music, battle music, effects and voices are unchanged.
+
 ## 0.14.0 — 2026-10-30
 
 ### Changed

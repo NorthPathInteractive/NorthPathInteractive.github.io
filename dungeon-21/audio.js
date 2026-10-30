@@ -6,7 +6,7 @@ window.DungeonAudio = (() => {
   const voices={};let voiceSource,voiceLoad;
   function loadVoices(){
     if(voiceLoad||typeof fetch!=='function')return;
-    voiceLoad=Promise.all(['hit','stand'].map(async word=>{try{const response=await fetch('audio/'+word+'.mp3?v=0.14.0');if(!response.ok)return;voices[word]=await ctx.decodeAudioData(await response.arrayBuffer());}catch{}}));
+    voiceLoad=Promise.all(['hit','stand'].map(async word=>{try{const response=await fetch('audio/'+word+'.mp3?v=0.15.0');if(!response.ok)return;voices[word]=await ctx.decodeAudioData(await response.arrayBuffer());}catch{}}));
   }
   // Rate, tone cutoff, bass boost, echo delay, level. The player's sample stays untouched.
   const voiceProfiles={
@@ -50,6 +50,21 @@ window.DungeonAudio = (() => {
   const tracks = {
     title: { bpm: 104, lead: [64,0,67,71,74,0,71,67,66,0,69,72,71,0,66,0,64,0,67,71,76,0,74,71,69,67,66,62,64,0,0,0], bass: [40,40,36,36,38,38,35,35], harmony: [59,0,0,0,55,0,0,0,57,0,0,0,54,0,0,0], drums: false },
     explore: { bpm: 72, lead: [64,0,0,0,67,0,0,66,0,0,59,0,0,0,0,0,64,0,0,0,65,0,0,0,59,0,62,0,0,0,0,0], bass: [40,40,36,36,41,41,35,35], harmony: [59,0,0,0,60,0,0,0,59,0,0,0,58,0,0,0], drums: false },
+    // Ruby: a measured expedition march, opening out after the quiet Emerald theme.
+    'explore-ruby': { bpm: 88,
+      lead: [69,0,72,76,0,74,72,0,69,0,67,69,0,0,64,0,65,0,69,72,0,71,69,0,67,0,64,68,0,0,71,0,
+             69,72,76,0,79,0,76,74,72,0,69,67,69,0,0,0,65,69,72,0,74,72,71,69,68,0,71,76,0,71,69,0],
+      bass: [45,45,41,41,38,38,40,40], harmony: [60,0,64,0,57,0,60,0,53,0,57,0,59,0,56,0], drums: false },
+    // Sapphire: rolling minor-key arpeggios and a light pulse carry the journey onward.
+    'explore-sapphire': { bpm: 104,
+      lead: [62,65,69,74,0,72,69,65,62,0,65,69,72,69,65,0,70,67,62,67,74,0,72,70,69,0,73,76,0,73,69,0,
+             74,77,81,77,74,72,69,0,65,69,72,77,76,72,69,0,70,74,77,74,72,70,67,0,69,73,76,79,76,73,74,0],
+      bass: [38,38,34,34,43,43,45,45], harmony: [57,0,60,0,53,0,57,0,58,0,62,0,61,0,64,0], drums: true },
+    // Amethyst: the fastest, brightest ascending phrases, with a final-hall sense of scale.
+    'explore-amethyst': { bpm: 120,
+      lead: [76,71,79,76,83,79,78,76,74,71,78,74,81,78,76,74,72,67,76,72,79,76,74,72,75,71,78,75,83,78,75,71,
+             76,79,83,79,78,76,74,71,72,76,79,76,74,72,71,67,69,72,76,79,81,79,78,76,75,78,83,78,76,0,71,0],
+      bass: [40,40,36,36,33,33,35,35], harmony: [59,0,62,0,55,0,59,0,57,0,60,0,59,0,63,0], drums: true },
     battle: { bpm: 148, lead: [64,67,71,67,64,67,74,71,62,66,69,66,62,66,72,69,60,64,67,64,60,64,71,67,59,63,66,69,71,69,66,63], bass: [40,40,38,38,36,36,35,35], harmony: [52,0,59,0,50,0,57,0,48,0,55,0,47,0,54,0], drums: true }
   };
   const frequency = midi => 440 * 2 ** ((midi - 69) / 12);

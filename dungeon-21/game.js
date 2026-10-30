@@ -322,7 +322,7 @@ function render() {
   lastAttributes={run:state,gold:state.gold,hp:state.hp};
   applyPalette();
   if(!started){sound?.play('title');renderScores();return;}
-  sound?.play(['play','monster','result'].includes(state.stage)?'battle':['dead','won'].includes(state.stage)?'silence':'explore');
+  sound?.play(['play','monster','result'].includes(state.stage)?'battle':['dead','won'].includes(state.stage)?'silence':['explore','explore-ruby','explore-sapphire','explore-amethyst'][state.hall]);
   const combat=!!state.enemy&&state.player.length>0&&['play','monster','result','dead'].includes(state.stage),m=state.enemy?monster():null;
   document.body.classList.toggle('battle',combat);document.body.classList.toggle('in-shop',state.stage==='shop');document.body.classList.toggle('has-key',state.key);
   $('health').textContent=`♥ ${state.hp}/${state.max}`;$('gold').textContent=`${state.gold}G`;
