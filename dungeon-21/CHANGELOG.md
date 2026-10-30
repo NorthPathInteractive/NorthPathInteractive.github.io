@@ -2,6 +2,19 @@
 
 Changes are listed newest first. Dates use America/Toronto time.
 
+## 0.5.0 — 2026-10-29
+
+### Added
+- Dedicated WIN and LOSE screens with player and monster totals and the hand's gold/health result.
+- After a surviving loss, Try Again pays the next ante; Run costs 2 gold and returns to exploration without a kill or reward.
+- Result screens persist on reload. A monster-defeating win waits for Continue before exploration resumes.
+
+### Changed
+- Larger game text, cards, controls and especially prominent card totals.
+- If a lost hand leaves too little gold for the next ante but enough to flee, offer the escape choice. If neither can be afforded, or health reaches zero, the run ends.
+- Run is disabled when fewer than 2 gold remain; it never charges twice or refunds the lost ante.
+- Existing saves, inventory, knowledge and local high scores remain compatible.
+
 ## 0.4.0 — 2026-10-29
 
 ### Added

@@ -25,6 +25,16 @@ setup(g,{gold:2,left:1});assert.equal(g.run('state.stage'),'play');g.run("finish
 setup(g,{gold:1,ante:2});assert.equal(g.run('state.stage'),'dead');assert.equal(g.run('state.gold'),1);assert.match(g.nodes.get('message').textContent,/Final score: 1 gold/);
 setup(g,{gold:3,ante:2});g.run("finish(-1,'Loss.');");assert.equal(g.run('state.stage'),'dead');assert.equal(g.run('state.gold'),1);assert.equal(g.run('state.hp'),9);
 setup(g,{hp:1});g.run("finish(-1,'Loss.');");assert.equal(g.run('state.stage'),'dead');assert.equal(g.run('state.gold'),18);
+// Result screens retain totals and allow paid flight after a surviving loss.
+setup(g);g.run("finish(1,'Win.');");assert.equal(g.run('state.outcome.kind'),'win');assert.equal(g.nodes.get('resultTitle').textContent,'WIN!');assert.equal(g.nodes.get('table').hidden,true);
+setup(g,{gold:8});g.run("finish(-1,'Loss.');");assert.equal(g.nodes.get('resultTitle').textContent,'LOSE');assert.equal(g.run('state.outcome.player'),16);const afterLoss=g.run('state.gold');
+let resultReload=game(g.storage);resultReload.start();assert.equal(resultReload.nodes.get('resultTitle').textContent,'LOSE');resultReload.run('flee();flee()');assert.equal(resultReload.run('state.gold'),afterLoss-2);assert.equal(resultReload.run('state.enemy'),null);assert.equal(resultReload.run('state.kills'),0);assert.equal(resultReload.run('state.stage'),'explore');
+// If the next ante is unaffordable but flight is affordable, keep the choice.
+setup(g,{gold:6,ante:4});g.run("finish(-1,'Loss.');");assert.equal(g.run('state.stage'),'result');assert.equal(g.run('state.gold'),2);g.run('flee()');assert.equal(g.run('state.gold'),0);assert.equal(g.run('state.stage'),'explore');
+setup(g,{gold:3,ante:1});g.run("finish(-1,'Loss.');deal()");assert.equal(g.run('state.outcome'),null);assert.equal(g.run('state.gold'),1);assert.equal(g.run('state.stage'),'play');
+setup(g,{gold:2,ante:1});g.run("finish(-1,'Loss.');flee()");assert.equal(g.run('state.gold'),1);assert.equal(g.run('state.stage'),'result');
+setup(g,{hp:1});g.run("finish(-1,'Loss.');flee()");assert.equal(g.run('state.stage'),'dead');assert.equal(g.run('state.gold'),18);
+setup(g,{left:1});g.run("finish(1,'Win.');");assert.equal(g.run('state.outcome.defeated'),true);assert.equal(g.run('validRun(state)'),true);const d=g.run('state.depth');g.run('explore()');assert.equal(g.run('state.depth'),d);g.run('dismissOutcome()');assert.equal(g.run('state.outcome'),null);
 // Exact threshold rules and the adaptive high-level rule match Identify text.
 for(const [level,hold] of [[1,12],[2,15],[3,17],[4,17]]){
  setup(g,{level});g.run(`state.player=${JSON.stringify(hand(['10','2']))};state.foe=${JSON.stringify(hand(hold===12?['5','6']:['10',String(hold-11)]))};`);assert.equal(g.run('monsterHit()'),true);
@@ -40,7 +50,7 @@ g.run('state.enemy.level=2;save()');const remaining=g.run('state.gold');let relo
 reload.run('restart()');assert.equal(reload.run('state.known.length'),0);assert.equal(reload.run('state.identify'),0);
 // Dragons do not end the run, even after the original fifth kill.
 setup(g,{index:4,level:3,left:1});g.run("state.kills=4;finish(1,'Win.');");assert.equal(g.run('state.kills'),5);assert.equal(g.run('state.stage'),'explore');
-g.run('state.kills=200;state.stage="explore";state.depth=2');g.random(.9);g.run('explore()');assert.equal(g.run('state.enemy.index'),4);assert.ok(g.run('state.enemy.level')>40);assert.notEqual(g.run('state.stage'),'won');
+g.run('state.kills=200;state.outcome=null;state.stage="explore";state.depth=2');g.random(.9);g.run('explore()');assert.equal(g.run('state.enemy.index'),4);assert.ok(g.run('state.enemy.level')>40);assert.notEqual(g.run('state.stage'),'won');
 // Random rooms, bounded healing, altar choices, and persisted pending choices.
 g.run('restart();state.depth=0');g.random(.1);g.run('explore()');assert.equal(g.run('state.gold'),23);
 g.run('state.hp=7');g.random(.2);g.run('explore()');assert.equal(g.run('state.hp'),10);assert.equal(g.run('state.room'),'fountain');
@@ -68,7 +78,7 @@ const blocked=game(new Map(),true);blocked.start();setup(blocked,{hp:1});blocked
 let seed=7;for(let trial=0;trial<100;trial++){
  const sim=game();sim.start();sim.run('window.seed=7+'+trial+';Math.random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}');
  for(let step=0;step<1000&&sim.run('state.stage')!=='dead';step++){
-  sim.run("if(state.stage==='room')altar(false);else if(state.stage==='explore')explore();else if(state.stage==='result')deal();else if(score(state.player)<16)hit();else stand();");
+  sim.run("if(state.outcome&&state.stage==='explore')dismissOutcome();else if(state.stage==='room')altar(false);else if(state.stage==='explore')explore();else if(state.stage==='result')deal();else if(score(state.player)<16)hit();else stand();");
   assert.ok(sim.run('state.gold>=0&&state.hp>=0&&state.hp<=10'));assert.ok(sim.run('validRun(state)'));
  }
  assert.equal(sim.run('state.stage'),'dead');

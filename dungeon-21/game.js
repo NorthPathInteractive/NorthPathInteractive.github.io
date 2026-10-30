@@ -12,12 +12,13 @@ const sound = window.DungeonAudio;
 let state, muted = true, started = false, storageOK = true;
 function fresh() {
   return {id:Date.now().toString(36)+'-'+Math.random().toString(36).slice(2),hp:10,max:10,gold:20,kills:0,depth:0,
-    stage:'explore',room:null,enemy:null,deck:[],player:[],foe:[],pot:0,identify:0,known:[],recorded:false,
+    stage:'explore',outcome:null,room:null,enemy:null,deck:[],player:[],foe:[],pot:0,identify:0,known:[],recorded:false,
     note:'10 health. 20 gold. Explore, win gold, survive. There is no final boss.'};
 }
 function validRun(r) {
   return r && typeof r.id==='string' && ['explore','room','play','result','dead'].includes(r.stage) &&
     ['hp','max','gold','kills','depth','pot','identify'].every(k=>Number.isSafeInteger(r[k])&&r[k]>=0) &&
+    (!r.outcome || (['win','loss'].includes(r.outcome.kind)&&typeof r.outcome.message==='string'&&typeof r.outcome.defeated==='boolean'&&[r.outcome.player,r.outcome.foe].every(Number.isSafeInteger))) &&
     (!r.room || ['chest','fountain','camp','altar','trap','quiet'].includes(r.room)) &&
     (r.stage!=='room'||r.room==='altar'&&!r.enemy) &&
     r.max===10 && r.hp<=10 && Array.isArray(r.known) && r.known.every(k=>typeof k==='string') &&
@@ -65,7 +66,7 @@ const rooms = {
   quiet: {name:'ECHO CHAMBER',hint:'Your footsteps return one beat too late.'}
 };
 function explore() {
-  if(state.stage!=='explore')return;
+  if(state.stage!=='explore'||state.outcome)return;
   state.depth++;state.enemy=null;state.room=null;
   const roll=Math.random();
   if(roll<.15) {
@@ -105,7 +106,7 @@ function deal() {
   if(!state.enemy||!['explore','result'].includes(state.stage))return;
   const ante=state.enemy.ante;
   if(state.gold<ante) { endRun(`You have ${state.gold} gold but need ${ante} for the next ante.`);render();return; }
-  state.gold-=ante;state.pot=ante;state.deck=deck();state.player=[state.deck.pop(),state.deck.pop()];state.foe=[state.deck.pop(),state.deck.pop()];state.stage='play';fx('card');
+  state.outcome=null;state.gold-=ante;state.pot=ante;state.deck=deck();state.player=[state.deck.pop(),state.deck.pop()];state.foe=[state.deck.pop(),state.deck.pop()];state.stage='play';fx('card');
   state.note=`${ante} gold ante paid. Win: collect ${ante*2} gold. Hit or stand?`;
   if(natural(state.player)||natural(state.foe)){settle();return;}render();
 }
@@ -132,9 +133,16 @@ function finish(result,msg) {
     state.hp=Math.max(0,state.hp-e.damage);msg+=` Lost ${ante} gold. −${e.damage} health.`;fx('hurt');flash('player-hurt');
   } else { state.gold+=ante;msg+=` ${ante} gold returned. No damage.`;fx('tie'); }
   state.note=msg;
+  state.outcome=result===0?null:{kind:result>0?'win':'loss',player:score(state.player),foe:score(state.foe),message:msg,defeated:!state.enemy};
   if(state.hp===0)endRun(msg);
-  else if(state.enemy&&state.gold<state.enemy.ante)endRun(msg+` You cannot cover the next ${state.enemy.ante}-gold ante.`);
+  else if(state.enemy&&state.gold<state.enemy.ante&&(result>=0||state.gold<2))endRun(msg+` You cannot cover the next ${state.enemy.ante}-gold ante.`);
   render();
+}
+function dismissOutcome() { state.outcome=null;render(); }
+function flee() {
+  if(state.stage!=='result'||state.outcome?.kind!=='loss'||!state.enemy||state.hp===0||state.gold<2)return;
+  state.gold-=2;state.enemy=null;state.outcome=null;state.room=null;state.player=[];state.foe=[];state.pot=0;state.stage='explore';
+  state.note='You escape into the passage. Spent 2 gold. The monster remains undefeated.';render();
 }
 function identify() {
   if(!state.enemy||!['play','result'].includes(state.stage)||state.identify<1||identified())return;
@@ -180,14 +188,18 @@ function render() {
   $('title').textContent=state.stage==='dead'?'GAME OVER':m?m.name:rooms[state.room]?.name||'THE QUIET HALL';
   $('subtitle').textContent=m?`${'♥'.repeat(state.enemy.left)} · `+(identified()?`LV ${state.enemy.level} · ${behavior(state.enemy)}`:'Not identified'):rooms[state.room]?.hint||'An endless dungeon. Every gold piece counts.';
   $('stakes').textContent=state.enemy?`ANTE ${state.enemy.ante}G / HAND · `+(state.stage==='play'?`POT ${state.pot*2}G`:'WIN RETURNS '+state.enemy.ante*2+'G'):'';
-  $('table').hidden=!combat;
+  const outcome=state.outcome&&state.stage!=='play'?state.outcome:null;
+  $('resultScreen').hidden=!outcome;$('scene').hidden=!!outcome;$('message').hidden=!!outcome;$('stakes').hidden=!!outcome;
+  if(outcome){$('resultTitle').textContent=outcome.kind==='win'?'WIN!':'LOSE';$('resultTotals').textContent=`YOU ${outcome.player>21?'BUST ('+outcome.player+')':outcome.player} / FOE ${outcome.foe>21?'BUST ('+outcome.foe+')':outcome.foe}`;$('resultMessage').textContent=state.note;$('resultHint').textContent=state.stage==='dead'?'GAME OVER':outcome.kind==='win'?(outcome.defeated?'MONSTER DEFEATED':'ONE MONSTER HEART REMOVED'):'TRY ANOTHER HAND OR FLEE FOR 2 GOLD';}
+  $('table').hidden=!combat||!!outcome;
   if(combat){$('enemyLabel').textContent=m.name;$('enemyScore').textContent=state.stage==='play'?'?':score(state.foe);$('playerScore').textContent=score(state.player);cards('enemyCards',state.foe,state.stage==='play');cards('playerCards',state.player,false);}
   $('message').textContent=state.note;$('actions').replaceChildren();
-  if(state.stage==='explore'){button('EXPLORE →',explore,'e');if(state.gold>=5&&state.hp<state.max)button('HEAL · 5G',potion);}
+  if(state.stage==='explore'&&outcome){button('CONTINUE →',dismissOutcome,'e');}
+  if(state.stage==='explore'&&!outcome){button('EXPLORE →',explore,'e');if(state.gold>=5&&state.hp<state.max)button('HEAL · 5G',potion);}
   if(state.stage==='room'){button('TOUCH ALTAR',()=>altar(true));button('LEAVE →',()=>altar(false),'e');}
   if(state.stage==='play'){button('HIT +',hit,'h');button('STAND ■',stand,'s');}
-  if(state.stage==='result')button(`NEXT HAND · ${state.enemy.ante}G`,deal,'e');
-  if(['play','result'].includes(state.stage)&&state.identify>0&&!identified())button(`IDENTIFY · ×${state.identify}`,identify,'i');
+  if(state.stage==='result'){button(`${outcome?.kind==='loss'?'TRY AGAIN':'NEXT HAND'} · ${state.enemy.ante}G`,deal,'e');const retry=$('actions').children[$('actions').children.length-1];retry.disabled=state.gold<state.enemy.ante;if(retry.disabled)retry.textContent=`TRY AGAIN · NEED ${state.enemy.ante}G`;if(outcome?.kind==='loss'){button('RUN · 2G',flee,'r');const run=$('actions').children[$('actions').children.length-1];run.disabled=state.gold<2;if(run.disabled)run.textContent='RUN · NEED 2G';}}
+  if(!outcome&&['play','result'].includes(state.stage)&&state.identify>0&&!identified())button(`IDENTIFY · ×${state.identify}`,identify,'i');
   if(state.stage==='dead')button('PLAY AGAIN',restart,'e');
   $('scoreEntry').hidden=state.stage!=='dead';$('scoreForm').hidden=state.recorded;
   $('finalScore').textContent=`${state.gold} GOLD`;
