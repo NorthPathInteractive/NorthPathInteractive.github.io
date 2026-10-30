@@ -129,7 +129,11 @@ function deal() {
   if(state.gold<ante) { endRun(`You have ${state.gold} gold but need ${ante} for the next ante.`);render();return; }
   $('playContent').scrollTop=0;state.outcome=null;state.turnLog=[];state.turnFrames=[];state.turnIndex=0;clearTimeout(monsterTimer);state.gold-=ante;state.pot=ante;state.deck=deck();state.player=[state.deck.pop(),state.deck.pop()];state.foe=[state.deck.pop(),state.deck.pop()];state.stage='play';fx('card');
   state.note=`${ante} gold ante paid. Win: collect ${ante*2} gold. Hit or stand?`;
-  if(natural(state.player)||natural(state.foe)){settle();return;}render();
+  if(natural(state.player)||natural(state.foe)){
+    const opening=natural(state.player)&&natural(state.foe)?'Both sides have blackjack.':natural(state.player)?'You have blackjack!':`${monster().name} has blackjack!`;
+    const text=`${opening} ${monster().name} reveals ${state.foe.map(c=>c.r+c.s).join(' ')} — total ${score(state.foe)}.`;
+    state.turnFrames=[{move:'REVEAL',text,cards:state.foe.map(c=>({...c}))}];state.turnLog=[text];state.stage='monster';state.note=text;
+  }render();
 }
 function hit() { if(state.stage!=='play')return;state.player.push(state.deck.pop());flashMove('HIT','YOU');fx('card');if(score(state.player)>21){finish(-1,'You bust.');return;}if(score(state.player)===21){stand(true);return;}render(); }
 function monsterHit() {

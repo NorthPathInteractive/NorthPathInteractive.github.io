@@ -6,7 +6,7 @@ window.DungeonAudio = (() => {
   const voices={};let voiceSource,voiceLoad;
   function loadVoices(){
     if(voiceLoad||typeof fetch!=='function')return;
-    voiceLoad=Promise.all(['hit','stand'].map(async word=>{try{const response=await fetch('audio/'+word+'.mp3?v=0.11.1');if(!response.ok)return;voices[word]=await ctx.decodeAudioData(await response.arrayBuffer());}catch{}}));
+    voiceLoad=Promise.all(['hit','stand'].map(async word=>{try{const response=await fetch('audio/'+word+'.mp3?v=0.11.2');if(!response.ok)return;voices[word]=await ctx.decodeAudioData(await response.arrayBuffer());}catch{}}));
   }
   const tracks = {
     title: { bpm: 104, lead: [64,0,67,71,74,0,71,67,66,0,69,72,71,0,66,0,64,0,67,71,76,0,74,71,69,67,66,62,64,0,0,0], bass: [40,40,36,36,38,38,35,35], harmony: [59,0,0,0,55,0,0,0,57,0,0,0,54,0,0,0], drums: false },

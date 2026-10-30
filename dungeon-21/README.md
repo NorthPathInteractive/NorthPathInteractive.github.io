@@ -1,6 +1,6 @@
 # Dungeon 21
 
-Playable blackjack dungeon quest, v0.11.1. In development.
+Playable blackjack dungeon quest, v0.11.2. In development.
 
 [Play the game](https://northpathinteractive.github.io/dungeon-21/) · [Project page](https://northpathinteractive.github.io/projects/dungeon-21/) · [CHANGELOG.md](CHANGELOG.md)
 
@@ -83,3 +83,7 @@ The hall HUD, Status, story and entry text do not reveal the next key or its pri
 ## Leaving battles (v0.11.1)
 
 Battle outcomes stay on their result screen. Continue after defeating a monster explores exactly one new random room immediately; running after a loss deducts 2G and does the same. No duplicate result message or extra Explore press follows. Multi-heart fights stay in battle for the next hand, and terminal win/game-over screens remain visible. Fleeing the final boss returns to its chamber.
+
+## Opening blackjacks (v0.11.2)
+
+An opening natural blackjack reveals both hands and waits for Show Result before applying payouts, damage or monster defeat. This uses the same saved monster-review state as ordinary turns, including after reload. Player, monster and simultaneous blackjacks retain their existing rules.

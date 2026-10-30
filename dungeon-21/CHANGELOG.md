@@ -2,6 +2,12 @@
 
 Changes are listed newest first. Dates use America/Toronto time.
 
+## 0.11.2 — 2026-10-30
+
+### Fixed
+- Opening blackjacks no longer resolve during the deal before the battle can be seen. Both hands and totals appear first; Show Result applies the outcome.
+- Player, monster and simultaneous blackjacks preserve the paid stake and review across reload, with settlement applied only once.
+
 ## 0.11.1 — 2026-10-30
 
 ### Fixed
