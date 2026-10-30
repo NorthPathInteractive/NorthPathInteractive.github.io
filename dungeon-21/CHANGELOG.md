@@ -2,6 +2,18 @@
 
 Changes are listed newest first. Dates use America/Toronto time.
 
+## 0.4.0 — 2026-10-29
+
+### Added
+- Distinct full-room pixel scenes for treasuries, whispering fountains, abandoned camps, cursed altars, dart galleries and echo chambers. Replaced the central doorway block in exploration.
+- Camps restore up to 1 health; eerie chambers offer atmospheric discoveries without a reward or penalty.
+- Cursed altars: leave safely, or take a clearly stated 50% chance of 6 gold versus 2 damage. Pending choices survive reload and cannot be claimed twice.
+- Occasional hidden darts deal 1 damage. Room hazards can end a run; remaining gold is still the final score.
+
+### Changed
+- Exploration uses a random room pool: 50% battles, 15% chests, 12% fountains, 8% camps, 8% altars, 4% traps and 3% echo chambers.
+- Fountains now occur randomly instead of every third room. Existing saves, Identify knowledge and high scores remain compatible.
+
 ## 0.3.1 — 2026-10-29
 
 ### Fixed

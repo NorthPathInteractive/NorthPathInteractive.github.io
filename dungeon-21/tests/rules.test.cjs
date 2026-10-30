@@ -41,14 +41,20 @@ reload.run('restart()');assert.equal(reload.run('state.known.length'),0);assert.
 // Dragons do not end the run, even after the original fifth kill.
 setup(g,{index:4,level:3,left:1});g.run("state.kills=4;finish(1,'Win.');");assert.equal(g.run('state.kills'),5);assert.equal(g.run('state.stage'),'explore');
 g.run('state.kills=200;state.stage="explore";state.depth=2');g.random(.9);g.run('explore()');assert.equal(g.run('state.enemy.index'),4);assert.ok(g.run('state.enemy.level')>40);assert.notEqual(g.run('state.stage'),'won');
-// Chest branches and stacking; fountains remain scheduled.
+// Random rooms, bounded healing, altar choices, and persisted pending choices.
 g.run('restart();state.depth=0');g.random(.1);g.run('explore()');assert.equal(g.run('state.gold'),23);
-g.run('state.depth=1;state.hp=7');
-// Sequence is controlled across exploration chance and loot roll.
-g.run('window.rolls=[.1,.9];Math.random=()=>rolls.shift()??.9;explore()'); // room 2 is a fountain
-assert.equal(g.run('state.hp'),10);
-g.run('state.depth=0;window.rolls=[.1,.9];explore()');assert.equal(g.run('state.identify'),1);
-g.run('state.depth=0;window.rolls=[.1,.9];explore()');assert.equal(g.run('state.identify'),2);
+g.run('state.hp=7');g.random(.2);g.run('explore()');assert.equal(g.run('state.hp'),10);assert.equal(g.run('state.room'),'fountain');
+g.run('state.hp=8');g.random(.3);g.run('explore()');assert.equal(g.run('state.hp'),9);assert.equal(g.run('state.room'),'camp');
+g.run('window.rolls=[.1,.9];Math.random=()=>rolls.shift()??.9;explore()');assert.equal(g.run('state.identify'),1);
+g.run('window.rolls=[.1,.9];explore()');assert.equal(g.run('state.identify'),2);
+g.random(.4);g.run('explore()');assert.equal(g.run('state.stage'),'room');assert.equal(g.run('validRun(state)'),true);
+let shrineReload=game(g.storage);shrineReload.start();assert.equal(shrineReload.run('state.stage'),'room');assert.equal(shrineReload.run('state.room'),'altar');
+const preGold=g.run('state.gold');g.random(.1);g.run('altar(true);altar(true)');assert.equal(g.run('state.gold'),preGold+6);assert.equal(g.run('state.stage'),'explore');
+g.random(.4);g.run('explore()');const preHealth=g.run('state.hp');g.run('altar(false)');assert.equal(g.run('state.hp'),preHealth);assert.equal(g.run('state.gold'),preGold+6);
+g.random(.4);g.run('explore()');g.random(.9);g.run('altar(true)');assert.equal(g.run('state.hp'),preHealth-2);
+g.random(.48);g.run('explore()');assert.equal(g.run('state.room'),'quiet');assert.equal(g.run('state.hp'),preHealth-2);
+g.run('state.hp=1');g.random(.45);g.run('explore()');assert.equal(g.run('state.stage'),'dead');assert.equal(g.run('state.hp'),0);assert.match(g.nodes.get('message').textContent,/Final score/);
+g.run('restart();state.hp=1');g.random(.4);g.run('explore()');g.random(.9);g.run('altar(true)');assert.equal(g.run('state.stage'),'dead');assert.equal(g.run('state.hp'),0);
 // Natural blackjack outranks 3-card 21; pushes return the stake.
 setup(g);g.run(`state.player=${JSON.stringify(hand(['A','K']))};state.foe=${JSON.stringify(hand(['7','7','7']))};settle();`);assert.equal(g.run('state.gold'),22);
 setup(g);g.run(`state.player=${JSON.stringify(hand(['A','K']))};state.foe=${JSON.stringify(hand(['A','Q']))};settle();`);assert.equal(g.run('state.gold'),20);
@@ -62,9 +68,9 @@ const blocked=game(new Map(),true);blocked.start();setup(blocked,{hp:1});blocked
 let seed=7;for(let trial=0;trial<100;trial++){
  const sim=game();sim.start();sim.run('window.seed=7+'+trial+';Math.random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}');
  for(let step=0;step<1000&&sim.run('state.stage')!=='dead';step++){
-  sim.run("if(state.stage==='explore')explore();else if(state.stage==='result')deal();else if(score(state.player)<16)hit();else stand();");
+  sim.run("if(state.stage==='room')altar(false);else if(state.stage==='explore')explore();else if(state.stage==='result')deal();else if(score(state.player)<16)hit();else stand();");
   assert.ok(sim.run('state.gold>=0&&state.hp>=0&&state.hp<=10'));assert.ok(sim.run('validRun(state)'));
  }
  assert.equal(sim.run('state.stage'),'dead');
 }
-console.log('PASS: ante/payout math, both game-over conditions, exact AI rules, Identify memory/reset, saved paid hand, endless dragons, chest loot, naturals, local top-10 scores, unavailable storage, and 100 complete seeded runs. DOM/audio are mocked.');
+console.log('PASS: ante/payout math, both game-over conditions, exact AI rules, Identify memory/reset, saved paid hand, endless dragons, room variety and altar save/choices, hazard death, chest loot, naturals, local top-10 scores, unavailable storage, and 100 complete seeded runs. DOM/audio are mocked.');
