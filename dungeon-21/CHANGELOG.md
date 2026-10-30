@@ -2,6 +2,18 @@
 
 Changes are listed newest first. Dates use America/Toronto time.
 
+## 0.8.0 — 2026-10-29
+
+### Added
+- A Status screen from exploration: hall, health, gold, rooms, kills, required/carried key, potions, known enemies, hand results, damage, healing, escapes, current ante/stake, shop interval, password, mode, tracked time and save availability.
+- Persisted run counters for wins, losses, ties, damage, restored health and escapes. Older saves keep existing progress; new counters and time are explicitly marked as tracked from this update.
+
+### Changed
+- Restored the earlier contextual layout: Hit/Stand in combat, Explore/Status during exploration, and Inventory near the top. Removed the fixed footer controls and fixed-height scrolling display.
+- Replaced coloured highlight boxes with coloured text only. Currency uses G, including negative gold in gold/yellow text; health uses ♥, with damage red and healing green.
+- Compact result examples: -1G ante, +2G returned, -1♥ and +4♥. Room descriptions remain intact.
+- Inventory and Status use their own clean views with Back/Close controls. Existing purchased potions, quests and scores remain compatible.
+
 ## 0.7.0 — 2026-10-29
 
 ### Added

@@ -1,6 +1,6 @@
 # Dungeon 21
 
-Playable blackjack dungeon quest, v0.7.0. In development.
+Playable blackjack dungeon quest, v0.8.0. In development.
 
 [Play the game](https://northpathinteractive.github.io/dungeon-21/) · [Project page](https://northpathinteractive.github.io/projects/dungeon-21/) · [CHANGELOG.md](CHANGELOG.md)
 
@@ -56,8 +56,10 @@ Update CHANGELOG.md in the same commit as shipped changes. Keep the game, README
 
 Pixel art, UI, music and game code created for North Path Interactive. No external assets or dependencies.
 
-## Fixed controls, inventory and results (v0.7.0)
+## Controls, Status and result text (v0.8.0)
 
-Explore and Inventory stay anchored at the bottom of a fixed-size game screen. Long room and battle details scroll within the display. Explore is disabled during combat and unresolved choices. Inventory remains available to inspect items; use a healing or Identify potion when its action is available. I toggles Inventory and Escape closes it. Healing is unavailable at full health, without a potion, or after death/victory. Saved v0.6.0 quests migrate with zero healing potions while retaining their other progress.
+Inventory sits at the top of the game screen. Exploration offers Explore and Status; battles offer Hit and Stand. The display uses the earlier natural layout rather than a fixed-height scroller or permanent footer buttons. Inventory holds purchased healing and Identify potions; prices and confirmation rules from v0.7.0 remain unchanged. I opens/closes Inventory; Escape closes Inventory or Status.
 
-Room and hand results use bold coloured highlights: red for losses/spending, gold for gold gained, green for healing and purple for potion/key information. The words and numbers remain readable without colour.
+Status shows hall and gate progress, health, gold, supplies, kills and rooms, identified enemies, hand results, damage, healing, escapes, ante and stake, the hall password, mode, tracked time and local-save availability. New counters persist in the quest save. Existing saves retain all previous progress; counters and time that were not previously recorded are clearly labelled as starting at this update.
+
+Result text is compact: -1G ante, +2G returned, -1♥ and +4♥. Gold changes use gold/yellow text regardless of sign; health loss is red and healing green. Item/key information is purple. Coloured backgrounds have been removed; descriptions, words and signs retain the meaning.

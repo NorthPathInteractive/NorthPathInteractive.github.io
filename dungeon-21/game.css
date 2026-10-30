@@ -36,19 +36,16 @@
 
 .in-shop #actions{display:grid;grid-template-columns:1fr 1fr}.in-shop #actions button{min-width:0}.in-shop:not(.has-key) #actions button:first-child,.in-shop #actions button:last-child{grid-column:1/-1}
 
-/* Keep the two primary controls anchored while room content scrolls. */
-.screen{height:570px;min-height:0;display:flex;flex-direction:column;overflow:hidden}#titleScreen,#menuScreen{min-height:0;overflow-y:auto;flex:1}
-#playScreen{display:flex;flex-direction:column;flex:1;min-height:0;position:relative}#playContent{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-right:3px;scrollbar-width:thin;scrollbar-color:var(--mid) var(--pale)}
-#playContent:focus-visible{outline:2px solid var(--dark);outline-offset:-2px}#actions{flex:none;padding-top:8px;max-height:160px;overflow-y:auto}#actions:empty{display:none}
-#persistentActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:none;border-top:2px solid var(--mid);padding-top:9px;margin-top:9px;background:var(--pale)}
-#persistentActions button,#inventoryPanel button{font:700 13px monospace;background:var(--dark);color:var(--pale);border:2px solid var(--dark);padding:12px 8px;min-height:46px;cursor:pointer}
-#persistentActions button:disabled,#inventoryPanel button:disabled{opacity:.45;cursor:not-allowed}#inventoryPanel{position:absolute;inset:0 0 66px;z-index:5;background:var(--pale);padding:12px 8px;overflow-y:auto;box-shadow:0 0 0 3px var(--mid);display:flex;flex-direction:column;gap:10px}
-#inventoryPanel h2{text-align:center;font-size:24px;margin:8px 0}#inventoryPanel p{font-size:14px;line-height:1.6;margin:4px 0}#inventoryPanel button{width:100%}#inventoryHelp{flex:1}.inventory{font-size:11px}
-#playContent #resultScreen{min-height:0}#titleScreen strong{font-size:54px}#titleScreen h2{margin:12px 0 8px}#titleScreen .title-door{font-size:36px;margin:8px 0}#titleActions{margin-top:10px}#titleActions button{padding:10px 8px}
-@media(max-width:480px){.screen{height:540px}#actions button,#persistentActions button{font-size:12px}}
-@media(max-height:700px){.screen{height:490px}}
 
-/* Text and numbers carry the meaning; colour reinforces gains and costs. */
-.impact{font-weight:900;padding:1px 3px;border-radius:2px;box-decoration-break:clone;-webkit-box-decoration-break:clone}.impact-loss{color:#8b1524;background:#ffe2e1}.impact-gold{color:#604000;background:#ffe794}.impact-heal{color:#124522;background:#d9f1cc}.impact-item{color:#4a2165;background:#eee0ff}#inventoryFeedback{font-weight:bold;min-height:22px}
+/* Contextual controls and clean, compact result text. */
+.screen{min-height:425px;height:auto;overflow:visible;display:block}#playScreen,#playContent{display:block}#actions{padding-top:8px}#actions:empty{display:none}
+.stats{align-items:center;flex-wrap:wrap}.stats #inventoryButton{margin-left:auto;font:700 11px monospace;background:var(--dark);color:var(--pale);border:0;padding:9px 10px;min-height:36px;cursor:pointer}
+#inventoryPanel,#statusPanel{padding:10px 0;background:transparent}#inventoryPanel h2,#statusPanel h2{font-size:24px;text-align:center;margin:10px 0 20px}#inventoryPanel p,#statusNote{font-size:13px;line-height:1.7}
+#inventoryPanel button,#closeStatus{display:block;width:100%;background:var(--dark);color:var(--pale);border:2px solid var(--dark);font:700 13px monospace;padding:13px 8px;min-height:46px;margin:10px 0;cursor:pointer}
+#inventoryPanel button:disabled{opacity:.45;cursor:not-allowed}#inventoryFeedback{font-weight:bold;min-height:22px}
+#statusDetails{margin:0;font-size:12px;line-height:1.5}#statusDetails>div{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:8px 0;border-bottom:1px dotted var(--mid)}#statusDetails dt{font-weight:700}#statusDetails dd{margin:0;text-align:right;overflow-wrap:anywhere}
+.impact{font-weight:900;background:none;padding:0;border-radius:0;text-shadow:0 0 0 currentColor}.impact-loss{color:#a31d2d}.impact-gold{color:#805600}.impact-heal{color:#12572d}.impact-item{color:#63297d}
+body.battle canvas{height:66px}.in-shop canvas{height:100px}.inventory{font-size:11px}
+@media(max-width:380px){.stats{gap:6px;font-size:15px}.stats #inventoryButton{font-size:10px;padding:9px 7px}#statusDetails{font-size:11px}}
 
-.in-shop canvas{height:80px}body.battle canvas{height:44px}.in-shop #actions{max-height:180px}
+.stats #gold{border-left:1px solid var(--mid);padding-left:10px}#statusHeader{display:flex;align-items:center;justify-content:space-between;gap:10px}#statusHeader h2{margin:10px 0}#closeStatusTop{font:700 11px monospace;background:var(--dark);color:var(--pale);border:0;padding:10px;cursor:pointer}
