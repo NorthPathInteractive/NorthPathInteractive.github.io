@@ -2,6 +2,18 @@
 
 Changes are listed newest first. Dates use America/Toronto time.
 
+## 0.10.0 — 2026-10-30
+
+### Added
+- Monster turns now unfold one step at a time: reveal the hidden card, draw each hit card separately with its updated total, then visibly stand or bust.
+- Matching brief HIT and STAND banners for the player and monster, with actor labels. Monster busts also display BUST. Reduced-motion preferences disable the banner's slide animation.
+- Original synthetic vocoded “Hit” and “Stand” voice clips for both sides. These play through the existing Sound control and pause/mute with the game audio.
+- Next Move can advance a step manually; Show Result appears after the monster finishes. Pending steps survive reload without rerolling cards, repaying antes or paying twice.
+
+### Changed
+- Automatic monster steps are spaced 1.2 seconds apart. Opening Inventory or hiding the page pauses the sequence; closing/returning resumes it.
+- Existing saves and completed monster reviews remain compatible. All asset cache labels match the release.
+
 ## 0.9.1 — 2026-10-30
 
 ### Fixed

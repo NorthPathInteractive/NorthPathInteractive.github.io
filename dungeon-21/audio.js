@@ -3,6 +3,11 @@
 window.DungeonAudio = (() => {
   let ctx, master, music, effects, noise, timer, next = 0, step = 0;
   let enabled = false, theme = 'title', active = '', fanfareUntil = 0;
+  const voices={};let voiceSource,voiceLoad;
+  function loadVoices(){
+    if(voiceLoad||typeof fetch!=='function')return;
+    voiceLoad=Promise.all(['hit','stand'].map(async word=>{try{const response=await fetch('audio/'+word+'.mp3?v=0.10.0');if(!response.ok)return;voices[word]=await ctx.decodeAudioData(await response.arrayBuffer());}catch{}}));
+  }
   const tracks = {
     title: { bpm: 104, lead: [64,0,67,71,74,0,71,67,66,0,69,72,71,0,66,0,64,0,67,71,76,0,74,71,69,67,66,62,64,0,0,0], bass: [40,40,36,36,38,38,35,35], harmony: [59,0,0,0,55,0,0,0,57,0,0,0,54,0,0,0], drums: false },
     explore: { bpm: 72, lead: [64,0,0,0,67,0,0,66,0,0,59,0,0,0,0,0,64,0,0,0,65,0,0,0,59,0,62,0,0,0,0,0], bass: [40,40,36,36,41,41,35,35], harmony: [59,0,0,0,60,0,0,0,59,0,0,0,58,0,0,0], drums: false },
@@ -73,7 +78,7 @@ window.DungeonAudio = (() => {
         noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
         const data = noise.getChannelData(0); for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
         if (timer) clearInterval(timer);
-        timer = setInterval(tick, 30);
+        timer = setInterval(tick, 30);loadVoices();
         ctx.onstatechange = () => {
           if (enabled && ctx.state === 'running' && !document.hidden) resetClock();
         };
@@ -93,6 +98,7 @@ window.DungeonAudio = (() => {
   function effect(name) {
     if (!enabled || !ctx || ctx.state !== 'running' || document.hidden) return;
     const at = ctx.currentTime + .01;
+    if(name==='voice-hit'||name==='voice-stand'){const buffer=voices[name.slice(6)];if(!buffer)return;if(voiceSource){try{voiceSource.stop();}catch{}}const source=ctx.createBufferSource();source.buffer=buffer;source.connect(effects);source.start(at);source.onended=()=>{source.disconnect();if(voiceSource===source)voiceSource=null;};voiceSource=source;return;}
     if (name === 'hit') { hiss(at, .09, .19, 600); note(76, at, .12, 'square', .15, effects, 43); }
     else if (name === 'hurt') { note(47, at, .22, 'sawtooth', .12, effects, 28); hiss(at, .15, .1, 200); }
     else if (name === 'card') note(82, at, .045, 'square', .06, effects, 75);

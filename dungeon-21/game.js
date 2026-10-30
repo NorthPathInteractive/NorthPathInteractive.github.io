@@ -11,11 +11,11 @@ const BOSS={name:'THE CROWNLESS KING',sprite:4,hearts:6,ante:8,damage:4};
 function hall(){return HALLS[state.hall];}
 function monster(e=state.enemy){return e?.boss?BOSS:{name:hall().names[e?.index||0],sprite:(e?.index||0)%5};}
 const sound = window.DungeonAudio;
-let state, muted = true, started = false, storageOK = true, inventoryOpen = false, inventoryNotice = '', statusOpen = false;
+let state, muted = true, started = false, storageOK = true, inventoryOpen = false, inventoryNotice = '', statusOpen = false, moveTimer = null, monsterTimer = null;
 function newTally(){return {wins:0,losses:0,ties:0,fled:0,damage:0,healed:0};}
 function fresh(hallIndex=0,admin=false) {
   return {id:Date.now().toString(36)+'-'+Math.random().toString(36).slice(2),hp:10,max:10,gold:admin?1000:5,kills:0,depth:0,hall:hallIndex,hallKills:0,key:false,sinceShop:0,admin,storySeen:false,final:false,
-    tally:newTally(),trackingSinceUpdate:false,startedAt:Date.now(),stage:'explore',outcome:null,turnLog:[],room:null,enemy:null,deck:[],player:[],foe:[],pot:0,healing:0,identify:0,known:[],recorded:false,
+    tally:newTally(),trackingSinceUpdate:false,startedAt:Date.now(),stage:'explore',outcome:null,turnLog:[],turnFrames:[],turnIndex:0,room:null,enemy:null,deck:[],player:[],foe:[],pot:0,healing:0,identify:0,known:[],recorded:false,
     note:admin?'ADMIN TEST: 1,000 starting gold. This quest is not ranked.':'The king gives you 5 gold. Find the key. Survive the Obsidian Veil.'};
 }
 function validRun(r) {
@@ -24,6 +24,7 @@ function validRun(r) {
     r.tally&&['wins','losses','ties','fled','damage','healed'].every(k=>Number.isSafeInteger(r.tally[k])&&r.tally[k]>=0)&&Number.isFinite(r.startedAt)&&typeof r.trackingSinceUpdate==='boolean'&&
     ['hp','max','gold','kills','depth','pot','identify','healing'].every(k=>Number.isSafeInteger(r[k])&&r[k]>=0) &&
     (r.turnLog===undefined||(Array.isArray(r.turnLog)&&r.turnLog.every(line=>typeof line==='string')))&&
+    (r.turnFrames===undefined||(Array.isArray(r.turnFrames)&&Number.isInteger(r.turnIndex)&&r.turnIndex>=0&&(!r.turnFrames.length||r.turnIndex<r.turnFrames.length)&&r.turnFrames.every(f=>f&&['REVEAL','HIT','STAND','BUST'].includes(f.move)&&typeof f.text==='string'&&Array.isArray(f.cards)&&f.cards.length>=2&&f.cards.every(c=>c&&['A','2','3','4','5','6','7','8','9','10','J','Q','K'].includes(c.r)&&['♠','♥','♣','♦'].includes(c.s))))) &&
     (!r.outcome || (['win','loss'].includes(r.outcome.kind)&&typeof r.outcome.message==='string'&&typeof r.outcome.defeated==='boolean'&&[r.outcome.player,r.outcome.foe].every(Number.isSafeInteger))) &&
     (!r.room || ['chest','fountain','camp','altar','trap','quiet','shop','stairs','final'].includes(r.room)) &&
     (r.stage!=='room'||r.room==='altar'&&!r.enemy) &&
@@ -121,31 +122,51 @@ function deal() {
   if(!state.enemy||!['explore','result'].includes(state.stage))return;
   const ante=state.enemy.ante;
   if(state.gold<ante) { endRun(`You have ${state.gold} gold but need ${ante} for the next ante.`);render();return; }
-  $('playContent').scrollTop=0;state.outcome=null;state.turnLog=[];state.gold-=ante;state.pot=ante;state.deck=deck();state.player=[state.deck.pop(),state.deck.pop()];state.foe=[state.deck.pop(),state.deck.pop()];state.stage='play';fx('card');
+  $('playContent').scrollTop=0;state.outcome=null;state.turnLog=[];state.turnFrames=[];state.turnIndex=0;clearTimeout(monsterTimer);state.gold-=ante;state.pot=ante;state.deck=deck();state.player=[state.deck.pop(),state.deck.pop()];state.foe=[state.deck.pop(),state.deck.pop()];state.stage='play';fx('card');
   state.note=`${ante} gold ante paid. Win: collect ${ante*2} gold. Hit or stand?`;
   if(natural(state.player)||natural(state.foe)){settle();return;}render();
 }
-function hit() { if(state.stage!=='play')return;state.player.push(state.deck.pop());fx('card');if(score(state.player)>21){finish(-1,'You bust.');return;}if(score(state.player)===21){stand();return;}render(); }
+function hit() { if(state.stage!=='play')return;state.player.push(state.deck.pop());flashMove('HIT','YOU');fx('card');if(score(state.player)>21){finish(-1,'You bust.');return;}if(score(state.player)===21){stand(true);return;}render(); }
 function monsterHit() {
   const e=state.enemy,n=score(state.foe);
   const hold=e.level===1?12:e.level===2?15:e.level===3?17:score([state.player[0]])>=7?17:15;
   return n<hold;
 }
-function stand() {
+function flashMove(move,actor){
+  if(move==='HIT'||move==='STAND')fx('voice-'+move.toLowerCase());
+  clearTimeout(moveTimer);$('moveActor').textContent=actor;$('moveText').textContent=move;
+  $('moveBanner').hidden=false;$('moveBanner').classList.remove('move-flash');void document.body.offsetWidth;$('moveBanner').classList.add('move-flash');
+  moveTimer=setTimeout(()=>{$('moveBanner').hidden=true;},950);
+}
+function monsterDone(){return !state.turnFrames?.length||state.turnIndex===state.turnFrames.length-1;}
+function scheduleMonster(){
+  clearTimeout(monsterTimer);
+  if(state.stage!=='monster'||monsterDone()||!started||inventoryOpen||statusOpen||document.hidden)return;
+  monsterTimer=setTimeout(advanceMonster,1200);
+}
+function advanceMonster(){
+  clearTimeout(monsterTimer);
+  if(state.stage!=='monster'||monsterDone()||inventoryOpen||statusOpen||document.hidden)return;
+  state.turnIndex++;const frame=state.turnFrames[state.turnIndex];state.foe=frame.cards.map(c=>({...c}));
+  state.turnLog=state.turnFrames.slice(0,state.turnIndex+1).map(f=>f.text);state.note=frame.text;
+  flashMove(frame.move,monster().name);if(frame.move==='HIT')fx('card');render();
+}
+function stand(fromHit=false) {
   if(state.stage!=='play')return;
-  const name=monster().name;
-  state.turnLog=[`${name} reveals ${state.foe.map(c=>c.r+c.s).join(' ')} — total ${score(state.foe)}.`];
+  if(fromHit!==true)flashMove('STAND','YOU');
+  const name=monster().name,frames=[];
+  const add=(move,text)=>frames.push({move,text,cards:state.foe.map(c=>({...c}))});
+  add('REVEAL',`${name} reveals ${state.foe.map(c=>c.r+c.s).join(' ')} — total ${score(state.foe)}.`);
   while(score(state.foe)<21&&monsterHit()){
-    const card=state.deck.pop();state.foe.push(card);
-    state.turnLog.push(`${name} hits: ${card.r}${card.s} — total ${score(state.foe)}.`);
+    const card=state.deck.pop();state.foe.push(card);add('HIT',`${name} hits: ${card.r}${card.s} — total ${score(state.foe)}.`);
   }
-  const total=score(state.foe);
-  state.turnLog.push(total>21?`${name} busts on ${total}!`:`${name} stands on ${total}.`);
-  state.stage='monster';state.note=state.turnLog[state.turnLog.length-1];fx('card');render();
+  const total=score(state.foe);add(total>21?'BUST':'STAND',total>21?`${name} busts on ${total}!`:`${name} stands on ${total}.`);
+  state.turnFrames=frames;state.turnIndex=0;state.foe=frames[0].cards.map(c=>({...c}));state.turnLog=[frames[0].text];
+  state.stage='monster';state.note=frames[0].text;fx('card');render();
 }
 function resolveMonster(){
-  if(state.stage!=='monster')return;
-  state.stage='play';settle();
+  if(state.stage!=='monster'||!monsterDone())return;
+  clearTimeout(monsterTimer);state.stage='play';settle();
 }
 function settle() {
   if(state.stage!=='play')return;
@@ -188,7 +209,7 @@ function potion() {
   state.note=`Healing potion: +${h} health. ${state.healing} remaining.`;inventoryNotice=state.note;fx('heal');render();
 }
 function buyHealing(){if(state.stage!=='shop'||state.gold<5)return;if(!confirm('Buy 1 healing potion for 5 gold?'))return;state.gold-=5;state.healing++;state.note='Healing potion +1. Spent 5 gold. Use it from Inventory.';fx('treasure');render();}
-function toggleInventory(){if(!started)return;statusOpen=false;inventoryOpen=!inventoryOpen;inventoryNotice='';renderInventory();if(inventoryOpen)$('closeInventory').focus();else $('inventoryButton').focus();}
+function toggleInventory(){if(!started)return;statusOpen=false;inventoryOpen=!inventoryOpen;inventoryNotice='';renderInventory();scheduleMonster();if(inventoryOpen)$('closeInventory').focus();else $('inventoryButton').focus();}
 function renderInventory(){
   $('inventoryPanel').hidden=!inventoryOpen;
   $('statusPanel').hidden=!statusOpen;
@@ -253,7 +274,7 @@ function recordScore(event) {
 }
 function menu(name,text){$('titleScreen').hidden=true;$('playScreen').hidden=true;$('menuScreen').hidden=false;$('menuTitle').textContent=name;$('menuText').textContent=text;$('codeForm').hidden=true;$('menuScores').hidden=true;$('menuActions').replaceChildren();}
 function menuButton(label,fn){const b=document.createElement('button');b.textContent=label;b.onclick=fn;$('menuActions').append(b);}
-function backTitle(){started=false;inventoryOpen=false;statusOpen=false;$('savedHint').textContent=`${state.admin?'ADMIN · ':''}${HALLS[state.hall].name.toUpperCase()} · ${state.hp}♥ · ${state.gold}G`;$('menuScreen').hidden=true;$('playScreen').hidden=true;$('titleScreen').hidden=false;applyPalette();render();}
+function backTitle(){clearTimeout(monsterTimer);clearTimeout(moveTimer);$('moveBanner').hidden=true;started=false;inventoryOpen=false;statusOpen=false;$('savedHint').textContent=`${state.admin?'ADMIN · ':''}${HALLS[state.hall].name.toUpperCase()} · ${state.hp}♥ · ${state.gold}G`;$('menuScreen').hidden=true;$('playScreen').hidden=true;$('titleScreen').hidden=false;applyPalette();render();}
 function showStory(){menu('THE KING’S REQUEST',`“A great hero must descend into the Halls of the Obsidian Veil,” the king tells you. “The journey will be cruel. Four halls lie below my kingdom. Buy each hall’s key, find its sealed stair, and descend. Only beyond the last lock will the final chamber and our buried secret be revealed.” He gives you five gold pieces. “Spend wisely. Return with the truth.”${state.hall||state.admin?' Your password begins this quest in '+hall().name+' Hall with '+state.gold+' gold.':''}`);menuButton('BEGIN THE QUEST →',()=>{state.storySeen=true;save();enterPlay();});menuButton('BACK',backTitle);}
 const CODES={emerald:[0,false],ruby:[1,false],sapphire:[2,false],amethyst:[3,false],gold:[0,true],goldruby:[1,true],goldsapphire:[2,true],goldamethyst:[3,true]};
 function submitCode(event){event?.preventDefault();const code=$('codeInput').value.trim().toLowerCase();const entry=CODES[code];if(!entry){$('codeFeedback').textContent='Unknown password. Try again.';return;}if(state.depth>0&&!['dead','won'].includes(state.stage)&&!confirm('Replace your saved quest with this password start?'))return;state=fresh(...entry);save();$('codeInput').value='';applyPalette();showStory();}
@@ -296,7 +317,7 @@ function render() {
   if(state.stage==='checkpoint')button('ENTER HALL →',enterHall,'e');
   if(state.stage==='final')button('FACE THE KING · 8G',battleBoss,'e');
   if(state.stage==='room'){button('TOUCH ALTAR',()=>altar(true));button('LEAVE →',()=>altar(false),'e');}
-  if(state.stage==='monster')button('SHOW RESULT →',resolveMonster,'e');
+  if(state.stage==='monster')button(monsterDone()?'SHOW RESULT →':'NEXT MOVE →',monsterDone()?resolveMonster:advanceMonster,'e');
   if(state.stage==='play'){button('HIT +',hit,'h');button('STAND ■',stand,'s');}
   if(state.stage==='result'){button(`${outcome?.kind==='loss'?'TRY AGAIN':'NEXT HAND'} · ${state.enemy.ante}G`,deal,'e');const retry=$('actions').children[$('actions').children.length-1];retry.disabled=state.gold<state.enemy.ante;if(retry.disabled)retry.textContent=`TRY AGAIN · NEED ${state.enemy.ante}G`;if(outcome?.kind==='loss'){button('RUN · 2G',flee,'r');const run=$('actions').children[$('actions').children.length-1];run.disabled=state.gold<2;if(run.disabled)run.textContent='RUN · NEED 2G';}}
 
@@ -305,11 +326,12 @@ function render() {
   $('finalScore').textContent=`${state.gold}G`;
   $('scoreFeedback').textContent=state.admin?'ADMIN TEST RUN — not ranked.':state.recorded?'Score saved on this device.':ended?'Enter up to 3 initials to record your score.':'';
   $('art').setAttribute('aria-label',m?m.name+' encounter':rooms[state.room]?.name||'A long dungeon hall with stone columns');
-  draw(m?m.sprite:-1,state.room);save();renderScores();renderStatus();renderInventory();
+  draw(m?m.sprite:-1,state.room);save();renderScores();renderStatus();renderInventory();scheduleMonster();
 }
-function restart(){inventoryOpen=false;statusOpen=false;state=fresh();$('initials').value='';save();started=false;backTitle();showStory();}
+function restart(){clearTimeout(monsterTimer);clearTimeout(moveTimer);$('moveBanner').hidden=true;inventoryOpen=false;statusOpen=false;state=fresh();$('initials').value='';save();started=false;backTitle();showStory();}
 $('restart').onclick=()=>{if(['dead','won'].includes(state.stage)||state.depth===0||confirm('Start a new run? Your current run will be replaced.'))restart();};
 $('sound').onclick=async()=>{await setSound(muted);if(!started)titleReady();};
+document.addEventListener('visibilitychange',()=>{if(document.hidden){clearTimeout(monsterTimer);$('moveBanner').hidden=true;}else scheduleMonster();});
 document.addEventListener('keydown',e=>{
   if(statusOpen&&e.key==='Escape'){e.preventDefault();toggleStatus();return;}
   if(statusOpen)return;
