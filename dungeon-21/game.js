@@ -15,7 +15,7 @@ let state, muted = true, started = false, storageOK = true, inventoryOpen = fals
 function newTally(){return {wins:0,losses:0,ties:0,fled:0,damage:0,healed:0};}
 function fresh(hallIndex=0,admin=false) {
   return {id:Date.now().toString(36)+'-'+Math.random().toString(36).slice(2),hp:10,max:10,gold:admin?1000:5,kills:0,depth:0,hall:hallIndex,hallKills:0,key:false,sinceShop:0,admin,storySeen:false,final:false,
-    tally:newTally(),trackingSinceUpdate:false,startedAt:Date.now(),stage:'explore',outcome:null,turnLog:[],turnFrames:[],turnIndex:0,room:null,enemy:null,deck:[],player:[],foe:[],pot:0,healing:0,identify:0,known:[],recorded:false,
+    tally:newTally(),trackingSinceUpdate:false,startedAt:Date.now(),stage:'explore',outcome:null,playerLog:[],turnLog:[],turnFrames:[],turnIndex:0,room:null,enemy:null,deck:[],player:[],foe:[],pot:0,healing:0,identify:0,known:[],recorded:false,
     note:admin?'ADMIN TEST: 1,000 starting gold. This quest is not ranked.':'The king gives you 5 gold. Find the key. Survive the Obsidian Veil.'};
 }
 function validRun(r) {
@@ -23,6 +23,7 @@ function validRun(r) {
     Number.isInteger(r.hall)&&r.hall>=0&&r.hall<4&&typeof r.key==='boolean'&&typeof r.admin==='boolean'&&typeof r.final==='boolean'&&typeof r.storySeen==='boolean'&&Number.isSafeInteger(r.hallKills)&&r.hallKills>=0&&Number.isSafeInteger(r.sinceShop)&&r.sinceShop>=0&&
     r.tally&&['wins','losses','ties','fled','damage','healed'].every(k=>Number.isSafeInteger(r.tally[k])&&r.tally[k]>=0)&&Number.isFinite(r.startedAt)&&typeof r.trackingSinceUpdate==='boolean'&&
     ['hp','max','gold','kills','depth','pot','identify','healing'].every(k=>Number.isSafeInteger(r[k])&&r[k]>=0) &&
+    (r.playerLog===undefined||(Array.isArray(r.playerLog)&&r.playerLog.every(line=>typeof line==='string')))&&
     (r.turnLog===undefined||(Array.isArray(r.turnLog)&&r.turnLog.every(line=>typeof line==='string')))&&
     (r.turnFrames===undefined||(Array.isArray(r.turnFrames)&&Number.isInteger(r.turnIndex)&&r.turnIndex>=0&&(!r.turnFrames.length||r.turnIndex<r.turnFrames.length)&&r.turnFrames.every(f=>f&&['REVEAL','HIT','STAND','BUST'].includes(f.move)&&typeof f.text==='string'&&Array.isArray(f.cards)&&f.cards.length>=2&&f.cards.every(c=>c&&['A','2','3','4','5','6','7','8','9','10','J','Q','K'].includes(c.r)&&['♠','♥','♣','♦'].includes(c.s))))) &&
     (!r.outcome || (['win','loss','tie'].includes(r.outcome.kind)&&typeof r.outcome.message==='string'&&typeof r.outcome.defeated==='boolean'&&[r.outcome.player,r.outcome.foe].every(Number.isSafeInteger))) &&
@@ -127,15 +128,22 @@ function deal() {
   if(!state.enemy||!['explore','result'].includes(state.stage))return;
   const ante=state.enemy.ante;
   if(state.gold<ante) { endRun(`You have ${state.gold} gold but need ${ante} for the next ante.`);render();return; }
-  $('playContent').scrollTop=0;state.outcome=null;state.turnLog=[];state.turnFrames=[];state.turnIndex=0;clearTimeout(monsterTimer);state.gold-=ante;state.pot=ante;state.deck=deck();state.player=[state.deck.pop(),state.deck.pop()];state.foe=[state.deck.pop(),state.deck.pop()];state.stage='play';fx('card');
+  $('playContent').scrollTop=0;state.outcome=null;state.playerLog=[];state.turnLog=[];state.turnFrames=[];state.turnIndex=0;clearTimeout(monsterTimer);state.gold-=ante;state.pot=ante;state.deck=deck();state.player=[state.deck.pop(),state.deck.pop()];state.foe=[state.deck.pop(),state.deck.pop()];state.stage='play';fx('card');
+  state.playerLog=[`You draw ${state.player.map(c=>c.r+c.s).join(' ')} — total ${score(state.player)}.`];state.turnLog=[...state.playerLog];
   state.note=`${ante} gold ante paid. Win: collect ${ante*2} gold. Hit or stand?`;
   if(natural(state.player)||natural(state.foe)){
     const opening=natural(state.player)&&natural(state.foe)?'Both sides have blackjack.':natural(state.player)?'You have blackjack!':`${monster().name} has blackjack!`;
     const text=`${opening} ${monster().name} reveals ${state.foe.map(c=>c.r+c.s).join(' ')} — total ${score(state.foe)}.`;
-    state.turnFrames=[{move:'REVEAL',text,cards:state.foe.map(c=>({...c}))}];state.turnLog=[text];state.stage='monster';state.note=text;
+    state.turnFrames=[{move:'REVEAL',text,cards:state.foe.map(c=>({...c}))}];state.turnLog=[...state.playerLog,text];state.stage='monster';state.note=text;
   }render();
 }
-function hit() { if(state.stage!=='play')return;state.player.push(state.deck.pop());flashMove('HIT','YOU');fx('card');if(score(state.player)>21){finish(-1,'You bust.');return;}if(score(state.player)===21){stand(true);return;}render(); }
+function logPlayer(text){state.playerLog??=[];state.playerLog.push(text);state.turnLog=[...state.playerLog];}
+function hit() {
+  if(state.stage!=='play')return;
+  const card=state.deck.pop();state.player.push(card);const total=score(state.player);
+  logPlayer(`You hit: ${card.r}${card.s} — total ${total}${total>21?' (bust)':total===21?' (21 reached)':''}.`);
+  flashMove('HIT','YOU');fx('card');if(total>21){finish(-1,'You bust.');return;}if(total===21){stand(true);return;}render();
+}
 function monsterHit() {
   const e=state.enemy,n=score(state.foe);
   const hold=e.level===1?12:e.level===2?15:e.level===3?17:score([state.player[0]])>=7?17:15;
@@ -166,12 +174,12 @@ function advanceMonster(){
   clearTimeout(monsterTimer);
   if(state.stage!=='monster'||monsterDone()||inventoryOpen||statusOpen||document.hidden)return;
   state.turnIndex++;const frame=state.turnFrames[state.turnIndex];state.foe=frame.cards.map(c=>({...c}));
-  state.turnLog=state.turnFrames.slice(0,state.turnIndex+1).map(f=>f.text);state.note=frame.text;
+  state.turnLog=[...(state.playerLog||[]),...state.turnFrames.slice(0,state.turnIndex+1).map(f=>f.text)];state.note=frame.text;
   flashMove(frame.move,monster().name);if(frame.move==='HIT')fx('card');render();
 }
 function stand(fromHit=false) {
   if(state.stage!=='play')return;
-  if(fromHit!==true)flashMove('STAND','YOU');
+  if(fromHit!==true){logPlayer(`You stand on ${score(state.player)}.`);flashMove('STAND','YOU');}
   const name=monster().name,frames=[];
   const add=(move,text)=>frames.push({move,text,cards:state.foe.map(c=>({...c}))});
   add('REVEAL',`${name} reveals ${state.foe.map(c=>c.r+c.s).join(' ')} — total ${score(state.foe)}.`);
@@ -179,7 +187,7 @@ function stand(fromHit=false) {
     const card=state.deck.pop();state.foe.push(card);add('HIT',`${name} hits: ${card.r}${card.s} — total ${score(state.foe)}.`);
   }
   const total=score(state.foe);add(total>21?'BUST':'STAND',total>21?`${name} busts on ${total}!`:`${name} stands on ${total}.`);
-  state.turnFrames=frames;state.turnIndex=0;state.foe=frames[0].cards.map(c=>({...c}));state.turnLog=[frames[0].text];
+  state.turnFrames=frames;state.turnIndex=0;state.foe=frames[0].cards.map(c=>({...c}));state.turnLog=[...(state.playerLog||[]),frames[0].text];
   state.stage='monster';state.note=frames[0].text;fx('card');render();
 }
 function resolveMonster(){
@@ -214,7 +222,7 @@ function dismissOutcome() {
 }
 function resumeExploration(){
   clearTimeout(monsterTimer);clearTimeout(moveTimer);$('moveBanner').hidden=true;
-  state.player=[];state.foe=[];state.turnLog=[];state.turnFrames=[];state.turnIndex=0;state.pot=0;
+  state.player=[];state.foe=[];state.playerLog=[];state.turnLog=[];state.turnFrames=[];state.turnIndex=0;state.pot=0;
   if(state.stage==='explore')explore();else render();
 }
 function flee() {
@@ -336,7 +344,7 @@ function render() {
   if(outcome){$('resultTitle').textContent=outcome.kind==='win'?'WIN!':outcome.kind==='tie'?'DRAW':'LOSE';$('resultTotals').textContent=`YOU ${outcome.player>21?'BUST ('+outcome.player+')':outcome.player} / FOE ${outcome.foe>21?'BUST ('+outcome.foe+')':outcome.foe}`;highlightChanges($('resultMessage'),state.note);$('resultHint').textContent=state.stage==='dead'?'GAME OVER':state.stage==='won'?'THE SECRET REVEALED':outcome.kind==='tie'?'STAKE RETURNED':outcome.kind==='win'?(outcome.defeated?'MONSTER DEFEATED':'ONE MONSTER HEART REMOVED'):'TRY ANOTHER HAND OR FLEE FOR 2 GOLD';}
   $('table').hidden=!combat||!!outcome;
   if(combat){$('enemyLabel').textContent=m.name;$('enemyScore').textContent=state.stage==='play'?'?':score(state.foe);$('playerScore').textContent=score(state.player);cards('enemyCards',state.foe,state.stage==='play');cards('playerCards',state.player,false);}
-  highlightChanges($('message'),state.note);$('monsterTurn').hidden=state.stage!=='monster';$('monsterLog').replaceChildren();if(state.stage==='monster')for(const line of state.turnLog){const li=document.createElement('li');li.textContent=line;$('monsterLog').append(li);}
+  highlightChanges($('message'),state.note);$('monsterTurn').hidden=!((['play','monster','result'].includes(state.stage)||!!outcome)&&state.turnLog?.length);$('monsterLog').replaceChildren();if(!$('monsterTurn').hidden)for(const line of state.turnLog){const li=document.createElement('li');li.textContent=line;$('monsterLog').append(li);}
   $('actions').replaceChildren();
   if(state.stage==='explore'&&!outcome){button('EXPLORE →',explore,'e');button('STATUS',toggleStatus);}
   if(state.stage==='explore'&&outcome){button('CONTINUE →',dismissOutcome,'e');}

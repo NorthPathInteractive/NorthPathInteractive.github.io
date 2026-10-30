@@ -2,6 +2,13 @@
 
 Changes are listed newest first. Dates use America/Toronto time.
 
+## 0.16.0 — 2026-10-30
+
+### Changed
+- The battle log includes the player’s opening cards, HIT draws/totals, STAND and busts before the foe’s actions.
+- All log entries use the same text size and weight; the final line no longer enlarges.
+- The combined log is visible during play and on the result screen, persists across reload, and resets for each hand. Existing saves remain compatible.
+
 ## 0.15.0 — 2026-10-30
 
 ### Added

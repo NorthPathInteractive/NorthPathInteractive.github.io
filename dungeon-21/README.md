@@ -1,6 +1,6 @@
 # Dungeon 21
 
-Playable blackjack dungeon quest, v0.15.0. In development.
+Playable blackjack dungeon quest, v0.16.0. In development.
 
 [Play the game](https://northpathinteractive.github.io/dungeon-21/) · [Project page](https://northpathinteractive.github.io/projects/dungeon-21/) · [CHANGELOG.md](CHANGELOG.md)
 
@@ -103,3 +103,7 @@ Only signed, actual changes receive emphasis in room/battle descriptions. Possib
 ## Hall exploration music (v0.15.0)
 
 Emerald retains its original sparse 72 BPM exploration theme. Ruby introduces an 88 BPM expedition march; Sapphire adds rolling minor-key arpeggios and a pulse at 104 BPM; Amethyst rises into a fuller 120 BPM final-hall adventure. Each new theme has its own 64-step lead, bass and harmony. Hall changes and password starts select the right theme. The title, battle, fanfare, effects and voices are unchanged.
+
+## Combined battle log (v0.16.0)
+
+The battle log records the player’s opening hand, hits with card/totals, stands and busts, then the foe’s revealed moves in order. It remains visible during play and on the result screen, uses uniform 14px text, and resets each new hand. Player history is saved separately from foe animation frames so it survives stepping/reload without duplicating. Earlier saves remain valid; past player actions that were never recorded are not invented.
