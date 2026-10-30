@@ -2,6 +2,13 @@
 
 Changes are listed newest first. Dates use America/Toronto time.
 
+## 0.13.0 — 2026-10-30
+
+### Added
+- Distinct HIT/STAND voice profiles for all 18 monster types and the Crownless King, with character-specific pitch, tone, bass and echo.
+- A deep, louder booming voice for the Amethyst Dragon; high bats and imps, heavy orcs and trolls, and echoing spirits.
+- The player retains the original vocoded voice. Monster processing follows Sound and uses compression to control peaks.
+
 ## 0.12.0 — 2026-10-30
 
 ### Changed

@@ -45,7 +45,7 @@ function save() { try { localStorage.setItem(KEY,JSON.stringify({version:3,run:s
 function score(hand) { let n=0,a=0; for(const c of hand){n+=c.r==='A'?11:['J','Q','K'].includes(c.r)?10:Number(c.r);if(c.r==='A')a++;}while(n>21&&a){n-=10;a--;}return n; }
 function natural(h) { return h.length===2&&score(h)===21; }
 function deck() { const d=[];for(const s of ['♠','♥','♣','♦'])for(const r of ['A','2','3','4','5','6','7','8','9','10','J','Q','K'])d.push({r,s});for(let i=d.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]];}return d; }
-function fx(name) { sound?.effect(name); }
+function fx(name,character) { sound?.effect(name,character); }
 function flash(name) { document.body.classList.remove('enemy-hit','player-hurt');void document.body.offsetWidth;document.body.classList.add(name);setTimeout(()=>document.body.classList.remove(name),600); }
 async function setSound(on) { const ok=await sound?.enable(on);muted=!ok;$('sound').textContent=muted?'SOUND OFF':'SOUND ON';$('sound').setAttribute('aria-pressed',String(!muted));return ok; }
 function enterPlay() { started=true;$('menuScreen').hidden=true;$('titleScreen').hidden=true;$('playScreen').hidden=false;render();$('actions').querySelector('button')?.focus(); }
@@ -142,7 +142,7 @@ function monsterHit() {
   return n<hold;
 }
 function flashMove(move,actor){
-  if(move==='HIT'||move==='STAND')fx('voice-'+move.toLowerCase());
+  if(move==='HIT'||move==='STAND')fx('voice-'+move.toLowerCase(),actor);
   clearTimeout(moveTimer);$(actor==='YOU'?'playerHand':'enemyHand').append($('moveBanner'));$('moveActor').textContent=actor;$('moveText').textContent=move;
   $('moveBanner').hidden=false;$('moveBanner').classList.remove('move-flash');void document.body.offsetWidth;$('moveBanner').classList.add('move-flash');
   moveTimer=setTimeout(()=>{$('moveBanner').hidden=true;},950);

@@ -1,6 +1,6 @@
 # Dungeon 21
 
-Playable blackjack dungeon quest, v0.12.0. In development.
+Playable blackjack dungeon quest, v0.13.0. In development.
 
 [Play the game](https://northpathinteractive.github.io/dungeon-21/) · [Project page](https://northpathinteractive.github.io/projects/dungeon-21/) · [CHANGELOG.md](CHANGELOG.md)
 
@@ -91,3 +91,7 @@ An opening natural blackjack reveals both hands and waits for Show Result before
 ## Automatic results and hand callouts (v0.12.0)
 
 HIT/STAND callouts sit beside the acting hand, with totals and cards unobstructed. After the final foe move, the hand stays visible for 1.2 seconds before automatic results; opening blackjacks remain visible for 1.8 seconds. Inventory, Status and hidden tabs pause the sequence. Reload resumes review without paying again. Ties have a DRAW result screen.
+
+## Character voices (v0.13.0)
+
+The player keeps the original vocoded HIT/STAND samples. Each of the 18 monster types and the Crownless King has a distinct, stable pitch/tone/echo profile. Bats and imps are high and sharp; orcs and trolls are low and heavy; spirits echo; the Amethyst Dragon has the deepest, loudest booming profile. Bass shaping and compression keep monster speech controlled on the effects bus. Profiles apply equally to both words and follow the existing Sound setting. No external voice service or new download is needed.

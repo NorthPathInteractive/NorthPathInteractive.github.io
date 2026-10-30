@@ -1,4 +1,4 @@
-/* Original procedural pocket-synth soundtrack. No downloads or audio assets. */
+/* Original procedural pocket-synth soundtrack and local vocoded move samples. */
 'use strict';
 window.DungeonAudio = (() => {
   let ctx, master, music, effects, noise, timer, next = 0, step = 0;
@@ -6,7 +6,46 @@ window.DungeonAudio = (() => {
   const voices={};let voiceSource,voiceLoad;
   function loadVoices(){
     if(voiceLoad||typeof fetch!=='function')return;
-    voiceLoad=Promise.all(['hit','stand'].map(async word=>{try{const response=await fetch('audio/'+word+'.mp3?v=0.12.0');if(!response.ok)return;voices[word]=await ctx.decodeAudioData(await response.arrayBuffer());}catch{}}));
+    voiceLoad=Promise.all(['hit','stand'].map(async word=>{try{const response=await fetch('audio/'+word+'.mp3?v=0.13.0');if(!response.ok)return;voices[word]=await ctx.decodeAudioData(await response.arrayBuffer());}catch{}}));
+  }
+  // Rate, tone cutoff, bass boost, echo delay, level. The player's sample stays untouched.
+  const voiceProfiles={
+    'MOSS GOBLIN':[1.19,2300,2,0,1.05],
+    'CAVE BAT':[1.62,5200,-6,.065,.95],
+    'THORN IMP':[1.43,3900,-3,0,1],
+    'CINDER HOUND':[.83,1800,7,.045,1.12],
+    'BLOOD SKELETON':[1.11,2900,-5,.09,1.05],
+    'ASH ORC':[.74,1500,9,0,1.2],
+    'EMBER WITCH':[1.27,3500,-1,.12,1.02],
+    'FROST SPIDER':[1.53,4600,-7,.035,.98],
+    'DROWNED KNIGHT':[.79,1100,6,.16,1.1],
+    'GLACIER TROLL':[.64,1200,11,.085,1.25],
+    'RIME WRAITH':[1.34,3200,-4,.19,1],
+    'ABYSS SERPENT':[.88,2100,3,.14,1.1],
+    'VOID MOTH':[1.48,4200,-8,.18,.95],
+    'CRYSTAL REVENANT':[1.06,4400,-2,.11,1.08],
+    'DUSK VAMPIRE':[.93,2700,4,.075,1.08],
+    'STARLESS SEER':[1.02,2400,0,.21,1.05],
+    'PRISM WYRM':[.69,1900,8,.13,1.28],
+    'AMETHYST DRAGON':[.56,1600,12,.17,1.5],
+    'THE CROWNLESS KING':[.61,2200,10,.2,1.35]
+  };
+  function speak(word,character,at){
+    const buffer=voices[word];if(!buffer)return;
+    if(voiceSource){try{voiceSource.stop();}catch{}}
+    const source=ctx.createBufferSource(),profile=voiceProfiles[character];source.buffer=buffer;
+    const nodes=[];
+    if(profile){
+      const [rate,cutoff,bass,echo,level]=profile;source.playbackRate.value=rate;
+      const tone=ctx.createBiquadFilter(),body=ctx.createBiquadFilter(),gain=ctx.createGain(),limiter=ctx.createDynamicsCompressor();
+      tone.type='lowpass';tone.frequency.value=cutoff;tone.Q.value=.6;
+      body.type='lowshelf';body.frequency.value=280;body.gain.value=bass;gain.gain.value=level;
+      limiter.threshold.value=-10;limiter.knee.value=12;limiter.ratio.value=5;limiter.attack.value=.003;limiter.release.value=.18;
+      source.connect(tone).connect(body).connect(gain).connect(limiter).connect(effects);nodes.push(tone,body,gain,limiter);
+      if(echo){const delay=ctx.createDelay(.3),wet=ctx.createGain();delay.delayTime.value=echo;wet.gain.value=.24;gain.connect(delay).connect(wet).connect(limiter);nodes.push(delay,wet);}
+    }else source.connect(effects);
+    source.onended=()=>{source.disconnect();if(voiceSource===source)voiceSource=null;setTimeout(()=>nodes.forEach(node=>node.disconnect()),350);};
+    voiceSource=source;source.start(at);
   }
   const tracks = {
     title: { bpm: 104, lead: [64,0,67,71,74,0,71,67,66,0,69,72,71,0,66,0,64,0,67,71,76,0,74,71,69,67,66,62,64,0,0,0], bass: [40,40,36,36,38,38,35,35], harmony: [59,0,0,0,55,0,0,0,57,0,0,0,54,0,0,0], drums: false },
@@ -95,10 +134,10 @@ window.DungeonAudio = (() => {
     } catch { enabled = false; return false; }
   }
   function play(name) { if (theme !== name) { theme = name; active = ''; } tick(); }
-  function effect(name) {
+  function effect(name,character='YOU') {
     if (!enabled || !ctx || ctx.state !== 'running' || document.hidden) return;
     const at = ctx.currentTime + .01;
-    if(name==='voice-hit'||name==='voice-stand'){const buffer=voices[name.slice(6)];if(!buffer)return;if(voiceSource){try{voiceSource.stop();}catch{}}const source=ctx.createBufferSource();source.buffer=buffer;source.connect(effects);source.start(at);source.onended=()=>{source.disconnect();if(voiceSource===source)voiceSource=null;};voiceSource=source;return;}
+    if(name==='voice-hit'||name==='voice-stand'){speak(name.slice(6),character,at);return;}
     if (name === 'hit') { hiss(at, .09, .19, 600); note(76, at, .12, 'square', .15, effects, 43); }
     else if (name === 'hurt') { note(47, at, .22, 'sawtooth', .12, effects, 28); hiss(at, .15, .1, 200); }
     else if (name === 'card') note(82, at, .045, 'square', .06, effects, 75);
