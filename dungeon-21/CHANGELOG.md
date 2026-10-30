@@ -2,6 +2,13 @@
 
 Changes are listed newest first. Dates use America/Toronto time.
 
+## 0.11.1 — 2026-10-30
+
+### Fixed
+- Continue after defeating a monster now explores the next room automatically, instead of repeating the battle result in the hallway.
+- Running after a loss spends 2G and immediately explores the next room. Battle outcomes remain on the battle result screen; multi-heart fights and final ending screens keep their existing flow.
+- Fleeing the final boss returns to its chamber. Existing saves and scores remain compatible.
+
 ## 0.11.0 — 2026-10-30
 
 ### Changed

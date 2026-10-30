@@ -195,12 +195,20 @@ function finish(result,msg) {
   else if(state.enemy&&state.gold<state.enemy.ante&&(result>=0||state.gold<2))endRun(msg+` You cannot cover the next ${state.enemy.ante}-gold ante.`);
   render();
 }
-function dismissOutcome() { state.outcome=null;render(); }
+function dismissOutcome() {
+  if(state.stage!=='explore'||!state.outcome||state.enemy)return;
+  state.outcome=null;resumeExploration();
+}
+function resumeExploration(){
+  clearTimeout(monsterTimer);clearTimeout(moveTimer);$('moveBanner').hidden=true;
+  state.player=[];state.foe=[];state.turnLog=[];state.turnFrames=[];state.turnIndex=0;state.pot=0;
+  if(state.stage==='explore')explore();else render();
+}
 function flee() {
   if(state.stage!=='result'||state.outcome?.kind!=='loss'||!state.enemy||state.hp===0||state.gold<2)return;
   state.tally.fled++;state.gold-=2;state.enemy=null;state.outcome=null;state.room=null;state.player=[];state.foe=[];state.pot=0;state.stage=state.final?'final':'explore';
   if(state.final)state.room='final';
-  state.note='You escape into the passage. Spent 2 gold. The monster remains undefeated.';render();
+  state.note='The Crownless King still guards the glistening chamber.';resumeExploration();
 }
 function identify() {
   if(!state.enemy||!['play','result'].includes(state.stage)||state.identify<1||identified())return;
