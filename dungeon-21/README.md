@@ -1,37 +1,57 @@
 # Dungeon 21
 
-Playable blackjack roguelike demo, v0.5.0. In development.
+Playable blackjack dungeon quest, v0.6.0. In development.
 
-Open index.html in a browser or serve this repository as a static website. No install or build step required. Game rules and controls are in the game's How to play panel. Progress and local high scores are stored in your browser when storage is available; New Run resets the active run, inventory and identified enemies.
+[Play the game](https://northpathinteractive.github.io/dungeon-21/) · [Project page](https://northpathinteractive.github.io/projects/dungeon-21/) · [CHANGELOG.md](CHANGELOG.md)
 
-See [CHANGELOG.md](CHANGELOG.md) for the version history and [the project page](https://northpathinteractive.github.io/projects/dungeon-21/) for What's New.
+## The Obsidian Veil
 
-## Current version
+The king sends a hero into four halls with 10 health and 5 gold. Buy one key in each hall and find its sealed stair. Your health, gold, inventory and identified enemies carry forward on descent. The final key opens a glistening chamber, its boss and the secret.
 
-Start an endless run with 10 health and 20 gold. Ante up for blackjack hands, find Identify potions, learn enemy behavior and survive increasingly difficult monsters. Zero health or an unaffordable ante ends the run; remaining gold is your score. Record up to three initials in the local top 10.
+| Hall | Required key | Price | Monster roster |
+| --- | --- | ---: | --- |
+| Emerald | Red | 25 | Moss Goblin, Cave Bat, Thorn Imp |
+| Ruby | Blue | 50 | Cinder Hound, Blood Skeleton, Ash Orc, Ember Witch |
+| Sapphire | Gold | 75 | Frost Spider, Drowned Knight, Glacier Troll, Rime Wraith, Abyss Serpent |
+| Amethyst | Amethyst | 100 | Void Moth, Crystal Revenant, Dusk Vampire, Starless Seer, Prism Wyrm, Amethyst Dragon |
 
-Power On unlocks audio and plays the original title theme. Start Adventure or Continue Run enters the dungeon. Play Silently bypasses audio. The Sound button mutes music and effects together; leaving the tab pauses audio. Returning to the page or tapping a control retries paused audio; tap Sound if Power On reports that audio is off.
+More monsters unlock as you defeat enemies within a hall. Each deeper hall raises antes, hearts, damage and playing intelligence. The final Crownless King has six hearts, an 8-gold ante and deals 4 damage per lost hand.
 
-The new rules use dungeon21-v2 saves. Earlier demo saves remain untouched under dungeon21-v1. Active stakes are saved so reloading does not charge an extra ante.
+## Exploration and spending
 
-## Checks
+Base room chances: battle 45%, chest 18%, shop 12%, sealed stair 8%, fountain 5%, altar 4%, camp 3%, trap 3%, eerie chamber 2%. A shop is guaranteed by the eighth exploration without one; this overrides the ordinary roll. A staircase cannot be entered without the current key. Shops sell one required key, Identify potions for 4 gold, and healing for 5 gold. Healing restores up to 4 health and always asks before spending. Fountains restore up to 3; camps restore 1. Altars offer a visible 50/50 choice of +6 gold or 2 damage; leave for free. Traps deal 1 damage.
 
-Run `node dungeon-21/tests/rules.test.cjs` and `node dungeon-21/tests/audio.test.cjs` from the repository root.
+Every blackjack hand costs an ante. Win and collect twice your stake, lose and forfeit the stake plus health, tie and receive the stake back. WIN/LOSE screens show both totals. After a surviving loss, Run costs 2 gold or Try Again pays another ante. Zero health or being unable to afford either ends the run. Remaining gold is the final score. Natural blackjack beats an ordinary 21.
 
-Checks cover gold accounting, bankruptcy and health death, AI descriptions, Identify memory, saved stakes, endless progression, loot, blackjack resolution, local scores, unavailable storage, and 100 simulated runs. DOM and audio are mocked; listening and mobile browser checks remain manual.
+## Shared passwords and admin testing
+
+Codes ignore capitalization and surrounding spaces. Every descent displays the next hall's password. Standard password starts receive 10 health and 5 gold. Admin starts receive 10 health and 1,000 gold and never enter rankings.
+
+| Code | Hall | Mode |
+| --- | --- | --- |
+| Emerald | Emerald | Normal |
+| Ruby | Ruby | Normal |
+| Sapphire | Sapphire | Normal |
+| Amethyst | Amethyst | Normal |
+| Gold | Emerald | Admin |
+| Goldruby | Ruby | Admin |
+| Goldsapphire | Sapphire | Admin |
+| Goldamethyst | Amethyst | Admin |
+
+Entering a valid code confirms before replacing a quest already underway. Passwords are shared checkpoints, not personal saves. They do not restore your previous inventory or bankroll.
+
+## Saves, scores and sound
+
+The quest uses `dungeon21-quest-v1` (schema 3); older endless saves remain untouched. Local top-10 scores continue under `dungeon21-scores-v1`. There is no server leaderboard. Fictional STARTER entries are labelled and replaced in the ranking by better real scores. Finishing or dying shows scrolling scores; reduced-motion preferences disable scrolling and shimmering animations.
+
+Power On enables title music; Begin the Quest or Continue enters play. Original exploration, battle, victory and defeat music and effects are preserved. Sound controls everything. Audio pauses when hidden and retries recovery on return or the next gesture.
+
+## Development and verification
+
+Serve this repository as a static website or open index.html in a browser. No install or build step is required. Run `node dungeon-21/tests/rules.test.cjs` and `node dungeon-21/tests/audio.test.cjs` from the repository root. Rules tests cover codes, story, keys, progression, boss ending, room probabilities, shop guarantees, healing confirmation, scores, saves, stakes and 100 seeded quests. Browser and audio are mocked in those tests; browser layout and listening require separate checks.
 
 ## Shipping a version
 
-Update CHANGELOG.md in the same commit as every shipped version. Include the version, release date, and short player-facing Added, Changed or Fixed entries as appropriate. Keep the README version, project catalogue and project page's What's New summary in sync. Clearly separate shipped changes from future plans.
+Update CHANGELOG.md in the same commit as shipped changes. Keep the game, README, catalogue, homepage card and project page's version and What's New summary consistent. Preserve history and link the project page to the authoritative changelog. Do not claim deployment is live until verified.
 
-Pixel art, icon, UI, music and game code created for North Path Interactive. No external assets or dependencies.
-
-## Exploration rooms (v0.4.0)
-
-Each Explore rolls a room: 50% battle, 15% chest, 12% fountain, 8% camp, 8% cursed altar, 4% dart trap, 3% echo chamber. Fountains replace the old scheduled healing rooms. Each noncombat room has a distinct full-screen pixel scene, title and description.
-
-Fountains heal up to 3; camps heal up to 1. Darts deal 1 damage. An altar offers a visible 50/50 choice: +6 gold or 2 damage, or leave for free. Hazards can end a run at zero health, preserving remaining gold as the score. An unresolved altar choice survives reload.
-
-## Hand result screens (v0.5.0)
-
-WIN and LOSE show both hand totals, payouts and damage in larger text. After a surviving loss, Try Again charges the next ante, or Run spends 2 gold and returns to exploration with no kill or reward. Run is unavailable with fewer than 2 gold. If neither option is affordable, or health is zero, the run ends. Pending result screens survive reload.
+Pixel art, UI, music and game code created for North Path Interactive. No external assets or dependencies.

@@ -2,6 +2,23 @@
 
 Changes are listed newest first. Dates use America/Toronto time.
 
+## 0.6.0 — 2026-10-29
+
+### Added
+- The king's opening story: descend into the Halls of the Obsidian Veil, unlock four gates, face the Crownless King and reveal the final secret.
+- Emerald, Ruby, Sapphire and Amethyst Halls with separate palettes and 18 distinct monsters and pixel sprites. Deeper halls raise antes, damage, endurance and AI difficulty; more monster types unlock with kills within each hall.
+- Random item shops selling the current hall's key, Identify potions (4 gold) and healing (5 gold). One required key per hall: Red 25, Blue 50, Gold 75, Amethyst 100. Keys cannot be purchased twice and are consumed on descent.
+- Sealed stair rooms, shared hall passwords, a glistening final chamber and a six-heart final boss.
+- Title-screen Enter Code and High Scores buttons; scrolling high scores on the title menu and at the end of a run. Low fictional STARTER entries are clearly labelled.
+- Shared codes Emerald, Ruby, Sapphire and Amethyst start at that hall with 10 health and 5 gold. Gold, Goldruby, Goldsapphire and Goldamethyst start the corresponding hall with 1,000 gold. Codes ignore capitalization. Admin runs are labelled and excluded from rankings.
+
+### Changed
+- Replaced endless progression with a four-hall quest. New normal quests start with only 5 gold and 10 health.
+- Approved base room distribution: battles 45%, chests 18%, shops 12%, stairs 8%, fountains 5%, altars 4%, camps 3%, traps 3%, eerie chambers 2%. A shop appears by the eighth exploration without one, overriding the random roll.
+- Large hand totals now sit directly beside their cards. Healing always asks for confirmation before spending gold.
+- The quest uses a separate save key. Older endless-demo saves and existing local high scores remain on the device; the new quest begins fresh.
+- Updated the game, catalogue and project page to v0.6.0, with consistent asset cache labels.
+
 ## 0.5.0 — 2026-10-29
 
 ### Added

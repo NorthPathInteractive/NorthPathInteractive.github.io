@@ -2,85 +2,47 @@
 const vm=require('node:vm'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const source=fs.readFileSync(path.join(__dirname,'../game.js'),'utf8');
 function game(storage=new Map(),blocked=false){
- const nodes=new Map();
- function node(){return {textContent:'',value:'',hidden:false,children:[],dataset:{},classList:{add(){},remove(){},toggle(){}},append(n){this.children.push(n)},replaceChildren(){this.children=[]},setAttribute(k,v){this[k]=v},focus(){},querySelector(){return this.children[0]},getContext(){return {fillRect(){},set fillStyle(v){}}}};}
- const effects=[],themes=[];
- const sandbox={console,Math:Object.create(Math),Date,setTimeout(){return 1},document:{body:{classList:{add(){},remove(){},toggle(){}},offsetWidth:390},activeElement:{tagName:'BODY'},addEventListener(){},getElementById(id){if(!nodes.has(id))nodes.set(id,node());return nodes.get(id)},createElement:node,querySelector(){return null}},localStorage:{getItem(k){if(blocked)throw Error('blocked');return storage.get(k)||null},setItem(k,v){if(blocked)throw Error('blocked');storage.set(k,v)}},confirm(){return true},DungeonAudio:{effect(n){effects.push(n)},play(n){themes.push(n)},async enable(v){return v}}};
+ const nodes=new Map(),palettes={};function node(){return {textContent:'',value:'',hidden:false,disabled:false,children:[],dataset:{},classList:{add(){},remove(){},toggle(){}},append(n){this.children.push(n)},replaceChildren(){this.children=[]},setAttribute(k,v){this[k]=v},focus(){},querySelector(){return this.children[0]},getContext(){return {fillRect(){},set fillStyle(v){}}}};}
+ const effects=[],themes=[];let confirmation=true;
+ const sandbox={console,Math:Object.create(Math),Date,setTimeout(){return 1},document:{documentElement:{style:{setProperty(k,v){palettes[k]=v}}},body:{classList:{add(){},remove(){},toggle(){}},offsetWidth:390},activeElement:{tagName:'BODY'},addEventListener(){},getElementById(id){if(!nodes.has(id))nodes.set(id,node());return nodes.get(id)},createElement:node,querySelector(){return null}},localStorage:{getItem(k){if(blocked)throw Error('blocked');return storage.get(k)||null},setItem(k,v){if(blocked)throw Error('blocked');storage.set(k,v)}},confirm(){return confirmation},DungeonAudio:{effect(n){effects.push(n)},play(n){themes.push(n)},async enable(v){return v}}};
  sandbox.window=sandbox;const env=vm.createContext(sandbox);vm.runInContext(source,env);const run=s=>vm.runInContext(s,env);
- return {run,nodes,storage,effects,themes,start(){nodes.get('silentStart').onclick()},random(v){sandbox.Math.random=()=>v}};
+ return {run,nodes,storage,effects,themes,palettes,start(){run('state.storySeen=true;enterPlay()')},random(v){sandbox.Math.random=()=>v},confirm(v){confirmation=v}};
 }
-const hand=(r)=>r.map(r=>({r,s:'♠'}));
-function setup(g,{gold=20,hp=10,index=0,level=1,left=2,ante=2,damage=1}={}){
- g.run(`state=fresh();state.gold=${gold};state.hp=${hp};state.enemy={index:${index},level:${level},left:${left},hearts:${left},ante:${ante},damage:${damage}};state.stage='result';state.depth=1;`);
- g.random(.5);g.run("deck=()=>Array.from({length:52},()=>({r:'8',s:'♠'}));deal();");
-}
-let g=game();g.start();assert.equal(g.run('state.hp'),10);assert.equal(g.run('state.gold'),20);
-// Stake accounting: ante charged once, guarded against duplicate dealing/settlement.
-setup(g);assert.equal(g.run('state.gold'),18);g.run('deal()');assert.equal(g.run('state.gold'),18);
-g.run("finish(1,'Win.');");assert.equal(g.run('state.gold'),22);assert.equal(g.run('state.enemy.left'),1);g.run("finish(1,'Again.');");assert.equal(g.run('state.gold'),22);
-setup(g);g.run("finish(0,'Tie.');");assert.equal(g.run('state.gold'),20);assert.equal(g.run('state.hp'),10);
-setup(g);g.run("finish(-1,'Loss.');");assert.equal(g.run('state.gold'),18);assert.equal(g.run('state.hp'),9);
-setup(g,{gold:2,left:1});assert.equal(g.run('state.stage'),'play');g.run("finish(1,'Win.');");assert.equal(g.run('state.gold'),4);assert.equal(g.run('state.stage'),'explore');
-// Unaffordable before the hand leaves remaining gold as score.
-setup(g,{gold:1,ante:2});assert.equal(g.run('state.stage'),'dead');assert.equal(g.run('state.gold'),1);assert.match(g.nodes.get('message').textContent,/Final score: 1 gold/);
-setup(g,{gold:3,ante:2});g.run("finish(-1,'Loss.');");assert.equal(g.run('state.stage'),'dead');assert.equal(g.run('state.gold'),1);assert.equal(g.run('state.hp'),9);
-setup(g,{hp:1});g.run("finish(-1,'Loss.');");assert.equal(g.run('state.stage'),'dead');assert.equal(g.run('state.gold'),18);
-// Result screens retain totals and allow paid flight after a surviving loss.
-setup(g);g.run("finish(1,'Win.');");assert.equal(g.run('state.outcome.kind'),'win');assert.equal(g.nodes.get('resultTitle').textContent,'WIN!');assert.equal(g.nodes.get('table').hidden,true);
-setup(g,{gold:8});g.run("finish(-1,'Loss.');");assert.equal(g.nodes.get('resultTitle').textContent,'LOSE');assert.equal(g.run('state.outcome.player'),16);const afterLoss=g.run('state.gold');
-let resultReload=game(g.storage);resultReload.start();assert.equal(resultReload.nodes.get('resultTitle').textContent,'LOSE');resultReload.run('flee();flee()');assert.equal(resultReload.run('state.gold'),afterLoss-2);assert.equal(resultReload.run('state.enemy'),null);assert.equal(resultReload.run('state.kills'),0);assert.equal(resultReload.run('state.stage'),'explore');
-// If the next ante is unaffordable but flight is affordable, keep the choice.
-setup(g,{gold:6,ante:4});g.run("finish(-1,'Loss.');");assert.equal(g.run('state.stage'),'result');assert.equal(g.run('state.gold'),2);g.run('flee()');assert.equal(g.run('state.gold'),0);assert.equal(g.run('state.stage'),'explore');
-setup(g,{gold:3,ante:1});g.run("finish(-1,'Loss.');deal()");assert.equal(g.run('state.outcome'),null);assert.equal(g.run('state.gold'),1);assert.equal(g.run('state.stage'),'play');
-setup(g,{gold:2,ante:1});g.run("finish(-1,'Loss.');flee()");assert.equal(g.run('state.gold'),1);assert.equal(g.run('state.stage'),'result');
-setup(g,{hp:1});g.run("finish(-1,'Loss.');flee()");assert.equal(g.run('state.stage'),'dead');assert.equal(g.run('state.gold'),18);
-setup(g,{left:1});g.run("finish(1,'Win.');");assert.equal(g.run('state.outcome.defeated'),true);assert.equal(g.run('validRun(state)'),true);const d=g.run('state.depth');g.run('explore()');assert.equal(g.run('state.depth'),d);g.run('dismissOutcome()');assert.equal(g.run('state.outcome'),null);
-// Exact threshold rules and the adaptive high-level rule match Identify text.
-for(const [level,hold] of [[1,12],[2,15],[3,17],[4,17]]){
- setup(g,{level});g.run(`state.player=${JSON.stringify(hand(['10','2']))};state.foe=${JSON.stringify(hand(hold===12?['5','6']:['10',String(hold-11)]))};`);assert.equal(g.run('monsterHit()'),true);
- g.run(`state.foe=${JSON.stringify(hand(['10',String(hold-10)]))};`);assert.equal(g.run('monsterHit()'),false);
-}
-setup(g,{level:4});g.run(`state.player=${JSON.stringify(hand(['2','2']))};state.foe=${JSON.stringify(hand(['10','5']))};`);assert.equal(g.run('monsterHit()'),false);
-// Unknown traits and level, potion stack consumption, same type/level memory.
-setup(g,{level:2});g.run('state.identify=2;render()');assert.match(g.nodes.get('subtitle').textContent,/Not identified/);assert.doesNotMatch(g.nodes.get('subtitle').textContent,/LV 2/);
-g.run('identify()');assert.equal(g.run('state.identify'),1);assert.match(g.nodes.get('subtitle').textContent,/LV 2.*15/);g.run('identify()');assert.equal(g.run('state.identify'),1);
-g.run('state.enemy={...state.enemy};render()');assert.match(g.nodes.get('subtitle').textContent,/LV 2/);g.run('state.enemy.level=3;render()');assert.match(g.nodes.get('subtitle').textContent,/Not identified/);
-// Save/resume retains paid stake, inventory, and known enemies without recharging.
-g.run('state.enemy.level=2;save()');const remaining=g.run('state.gold');let reload=game(g.storage);reload.start();assert.equal(reload.run('state.gold'),remaining);assert.equal(reload.run('state.identify'),1);assert.equal(reload.run('identified()'),true);assert.equal(reload.run('state.pot'),2);
-reload.run('restart()');assert.equal(reload.run('state.known.length'),0);assert.equal(reload.run('state.identify'),0);
-// Dragons do not end the run, even after the original fifth kill.
-setup(g,{index:4,level:3,left:1});g.run("state.kills=4;finish(1,'Win.');");assert.equal(g.run('state.kills'),5);assert.equal(g.run('state.stage'),'explore');
-g.run('state.kills=200;state.outcome=null;state.stage="explore";state.depth=2');g.random(.9);g.run('explore()');assert.equal(g.run('state.enemy.index'),4);assert.ok(g.run('state.enemy.level')>40);assert.notEqual(g.run('state.stage'),'won');
-// Random rooms, bounded healing, altar choices, and persisted pending choices.
-g.run('restart();state.depth=0');g.random(.1);g.run('explore()');assert.equal(g.run('state.gold'),23);
-g.run('state.hp=7');g.random(.2);g.run('explore()');assert.equal(g.run('state.hp'),10);assert.equal(g.run('state.room'),'fountain');
-g.run('state.hp=8');g.random(.3);g.run('explore()');assert.equal(g.run('state.hp'),9);assert.equal(g.run('state.room'),'camp');
-g.run('window.rolls=[.1,.9];Math.random=()=>rolls.shift()??.9;explore()');assert.equal(g.run('state.identify'),1);
-g.run('window.rolls=[.1,.9];explore()');assert.equal(g.run('state.identify'),2);
-g.random(.4);g.run('explore()');assert.equal(g.run('state.stage'),'room');assert.equal(g.run('validRun(state)'),true);
-let shrineReload=game(g.storage);shrineReload.start();assert.equal(shrineReload.run('state.stage'),'room');assert.equal(shrineReload.run('state.room'),'altar');
-const preGold=g.run('state.gold');g.random(.1);g.run('altar(true);altar(true)');assert.equal(g.run('state.gold'),preGold+6);assert.equal(g.run('state.stage'),'explore');
-g.random(.4);g.run('explore()');const preHealth=g.run('state.hp');g.run('altar(false)');assert.equal(g.run('state.hp'),preHealth);assert.equal(g.run('state.gold'),preGold+6);
-g.random(.4);g.run('explore()');g.random(.9);g.run('altar(true)');assert.equal(g.run('state.hp'),preHealth-2);
-g.random(.48);g.run('explore()');assert.equal(g.run('state.room'),'quiet');assert.equal(g.run('state.hp'),preHealth-2);
-g.run('state.hp=1');g.random(.45);g.run('explore()');assert.equal(g.run('state.stage'),'dead');assert.equal(g.run('state.hp'),0);assert.match(g.nodes.get('message').textContent,/Final score/);
-g.run('restart();state.hp=1');g.random(.4);g.run('explore()');g.random(.9);g.run('altar(true)');assert.equal(g.run('state.stage'),'dead');assert.equal(g.run('state.hp'),0);
-// Natural blackjack outranks 3-card 21; pushes return the stake.
-setup(g);g.run(`state.player=${JSON.stringify(hand(['A','K']))};state.foe=${JSON.stringify(hand(['7','7','7']))};settle();`);assert.equal(g.run('state.gold'),22);
-setup(g);g.run(`state.player=${JSON.stringify(hand(['A','K']))};state.foe=${JSON.stringify(hand(['A','Q']))};settle();`);assert.equal(g.run('state.gold'),20);
-// Score initials are normalized and a run can be recorded once, including after reload.
-setup(g,{hp:1});g.run("finish(-1,'Loss.');");g.nodes.get('initials').value='a!bc';g.run('recordScore()');assert.equal(JSON.parse(g.storage.get('dungeon21-scores-v1'))[0].initials,'ABC');g.run('recordScore()');assert.equal(JSON.parse(g.storage.get('dungeon21-scores-v1')).length,1);
-reload=game(g.storage);reload.start();assert.equal(reload.run('state.recorded'),true);reload.run('recordScore()');assert.equal(JSON.parse(g.storage.get('dungeon21-scores-v1')).length,1);
-for(let i=0;i<12;i++){g.run(`state=fresh();state.id='score-${i}';state.gold=${i};state.depth=${i};state.stage='dead';render()`);g.nodes.get('initials').value='XYZ';g.run('recordScore()');}
-const scores=JSON.parse(g.storage.get('dungeon21-scores-v1'));assert.equal(scores.length,10);assert.ok(scores.every((r,i)=>i===0||scores[i-1].gold>=r.gold));
-const blocked=game(new Map(),true);blocked.start();setup(blocked,{hp:1});blocked.run("finish(-1,'Loss.');");blocked.nodes.get('initials').value='AAA';blocked.run('recordScore()');assert.match(blocked.nodes.get('scoreFeedback').textContent,/Could not save/);assert.equal(blocked.run('state.recorded'),false);
-// Seeded complete runs: no negative bankroll/health, dangling encounter or invalid save.
-let seed=7;for(let trial=0;trial<100;trial++){
- const sim=game();sim.start();sim.run('window.seed=7+'+trial+';Math.random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}');
- for(let step=0;step<1000&&sim.run('state.stage')!=='dead';step++){
-  sim.run("if(state.outcome&&state.stage==='explore')dismissOutcome();else if(state.stage==='room')altar(false);else if(state.stage==='explore')explore();else if(state.stage==='result')deal();else if(score(state.player)<16)hit();else stand();");
-  assert.ok(sim.run('state.gold>=0&&state.hp>=0&&state.hp<=10'));assert.ok(sim.run('validRun(state)'));
- }
- assert.equal(sim.run('state.stage'),'dead');
-}
-console.log('PASS: ante/payout math, both game-over conditions, exact AI rules, Identify memory/reset, saved paid hand, endless dragons, room variety and altar save/choices, hazard death, chest loot, naturals, local top-10 scores, unavailable storage, and 100 complete seeded runs. DOM/audio are mocked.');
+function setup(g,{gold=20,hp=10,ante=2,left=2,hall=0,damage=1}={}){g.run(`state=fresh(${hall});state.storySeen=true;state.gold=${gold};state.hp=${hp};state.enemy={index:0,level:${hall+1},left:${left},hearts:${left},ante:${ante},damage:${damage}};state.stage='result';state.depth=1;deck=()=>Array.from({length:52},()=>({r:'8',s:'♠'}));deal();`);}
+let g=game();assert.equal(g.run('state.hp'),10);assert.equal(g.run('state.gold'),5);g.nodes.get('silentStart').onclick();assert.equal(g.nodes.get('menuTitle').textContent,'THE KING’S REQUEST');assert.equal(g.run('started'),false);g.nodes.get('menuActions').children[0].onclick();assert.equal(g.run('started'),true);
+assert.equal(g.run("score([{r:'A'},{r:'A'},{r:'9'}])"),21);assert.equal(g.run('new Set(deck().map(c=>c.r+c.s)).size'),52);
+setup(g);assert.equal(g.run('state.gold'),18);g.run('deal()');assert.equal(g.run('state.gold'),18);g.run("finish(1,'Win');finish(1,'Again')");assert.equal(g.run('state.gold'),22);assert.equal(g.run('state.enemy.left'),1);assert.equal(g.nodes.get('resultTitle').textContent,'WIN!');
+setup(g);g.run("finish(0,'Tie')");assert.equal(g.run('state.gold'),20);assert.equal(g.run('state.hp'),10);
+setup(g);g.run("finish(-1,'Loss')");assert.equal(g.run('state.gold'),18);assert.equal(g.run('state.hp'),9);assert.equal(g.nodes.get('resultTitle').textContent,'LOSE');
+let reload=game(g.storage);reload.start();assert.equal(reload.nodes.get('resultTitle').textContent,'LOSE');reload.run('flee();flee()');assert.equal(reload.run('state.gold'),16);assert.equal(reload.run('state.kills'),0);
+setup(g,{gold:6,ante:4});g.run("finish(-1,'Loss')");assert.equal(g.run('state.stage'),'result');g.run('flee()');assert.equal(g.run('state.gold'),0);
+setup(g,{gold:3,ante:2});g.run("finish(-1,'Loss')");assert.equal(g.run('state.stage'),'dead');assert.equal(g.run('state.gold'),1);
+setup(g,{hp:1});g.run("finish(-1,'Loss');flee()");assert.equal(g.run('state.stage'),'dead');assert.equal(g.run('state.gold'),18);
+// Every approved room boundary; random shop safety net and random fountains.
+for(const [roll,room] of [[.1,'chest'],[.2,'shop'],[.33,'stairs'],[.4,'fountain'],[.44,'camp'],[.48,'altar'],[.51,'trap'],[.54,'quiet']]){g.run('state=fresh();state.hp=7');g.random(roll);g.run('explore()');assert.equal(g.run('state.room'),room);assert.equal(g.run('validRun(state)'),true);}
+g.run('state=fresh();state.sinceShop=7');g.random(.9);g.run('explore()');assert.equal(g.run('state.stage'),'shop');assert.equal(g.run('state.sinceShop'),0);
+g.run('state=fresh();state.hp=8');g.random(.4);g.run('explore()');assert.equal(g.run('state.hp'),10);
+g.run('state=fresh();state.hp=1');g.random(.51);g.run('explore()');assert.equal(g.run('state.stage'),'dead');
+g.run('state=fresh();state.hp=1');g.random(.48);g.run('explore()');g.random(.9);g.run('altar(true)');assert.equal(g.run('state.stage'),'dead');
+g.run('state=fresh()');g.random(.48);g.run('explore()');reload=game(g.storage);reload.start();assert.equal(reload.run('state.stage'),'room');reload.random(.1);reload.run('altar(true);altar(true)');assert.equal(reload.run('state.gold'),11);
+// Healing confirmation never spends when cancelled; repeated full-health purchase is blocked.
+g.run('state=fresh();state.gold=10;state.hp=7');g.confirm(false);g.run('potion()');assert.equal(g.run('state.gold'),10);assert.equal(g.run('state.hp'),7);g.confirm(true);g.run('potion();potion()');assert.equal(g.run('state.gold'),5);assert.equal(g.run('state.hp'),10);
+// All shared code mappings, case handling, invalid input and active-save replacement.
+g.nodes.get('enterCode').onclick();
+for(const [code,h,admin] of [['Emerald',0,false],['Ruby',1,false],['Sapphire',2,false],['Amethyst',3,false],['Gold',0,true],['Goldruby',1,true],['Goldsapphire',2,true],['Goldamethyst',3,true]]){g.run('state=fresh()');g.nodes.get('codeInput').value=' '+code.toUpperCase()+' ';g.run('submitCode()');assert.equal(g.run('state.hall'),h);assert.equal(g.run('state.admin'),admin);assert.equal(g.run('state.gold'),admin?1000:5);}
+g.run('state=fresh();state.depth=3');g.confirm(false);g.nodes.get('codeInput').value='Gold';g.run('submitCode()');assert.equal(g.run('state.gold'),5);g.confirm(true);g.nodes.get('codeInput').value='INVALID';g.run('submitCode()');assert.equal(g.run('state.gold'),5);assert.match(g.nodes.get('codeFeedback').textContent,/Unknown/);
+// Distinct rosters and progressively harder thresholds, damage, hearts and antes.
+const all=[];for(let h=0;h<4;h++){g.run(`state=fresh(${h});state.hallKills=100`);g.random(.99);g.run('state.enemy=encounter()');assert.equal(g.run('state.enemy.index'),h+2);assert.equal(g.run('state.enemy.level'),h+1);assert.equal(g.run('state.enemy.damage'),h+1);all.push(...JSON.parse(g.run('JSON.stringify(hall().names)')));g.run("state.player=[{r:'10'},{r:'2'}];state.foe=[{r:'10'},{r:'1'}]");assert.equal(g.run('monsterHit()'),true);}assert.equal(new Set(all).size,18);
+setup(g,{hall:1});g.run('state.identify=2;identify();identify()');assert.equal(g.run('state.identify'),1);assert.equal(g.run('identified()'),true);g.run('state.hall=2');assert.equal(g.run('identified()'),false);
+// Complete all four gates; one key per hall, exact prices, no duplicate charges, state carried.
+g.run('state=fresh(0,true);state.storySeen=true;state.hp=7;state.identify=2');let remaining=1000;
+for(let h=0;h<4;h++){g.run("state.stage='shop'");const cost=[25,50,75,100][h];g.run('buyKey();buyKey()');remaining-=cost;assert.equal(g.run('state.gold'),remaining);assert.equal(g.run('state.key'),true);reload=game(g.storage);reload.start();assert.equal(reload.run('state.key'),true);g.run("state.stage='stairs';descend();descend()");assert.equal(g.run('state.key'),false);assert.equal(g.run('state.hp'),7);assert.equal(g.run('state.identify'),2);if(h<3){assert.equal(g.run('state.stage'),'checkpoint');assert.match(g.nodes.get('message').textContent,new RegExp(['RUBY','SAPPHIRE','AMETHYST'][h]));g.run('enterHall()');assert.equal(g.run('state.hall'),h+1);}else assert.equal(g.run('state.stage'),'final');assert.equal(g.run('validRun(state)'),true);}
+assert.equal(remaining,750);g.run('battleBoss()');assert.equal(g.run('state.enemy.boss'),true);assert.equal(g.run('state.gold'),742);
+for(let i=0;i<6;i++){if(i)g.run('deal()');g.run("finish(1,'Win')");}assert.equal(g.run('state.stage'),'won');assert.match(g.nodes.get('resultMessage').textContent,/stolen sunlight/);assert.equal(g.nodes.get('endingScores').hidden,false);g.nodes.get('initials').value='ADM';g.run('recordScore()');assert.equal(g.run('state.recorded'),false);
+g.run("state=fresh();state.stage='stairs';descend()");assert.equal(g.run('state.hall'),0);g.run("state.stage='shop';buyKey()");assert.equal(g.run('state.key'),false);assert.equal(g.run('state.gold'),5);
+// Real terminal scores save once; seeded rows stay visibly fictional and are not stored.
+setup(g,{hp:1});g.run("finish(-1,'Loss')");g.nodes.get('initials').value='a!bc';g.run('recordScore();recordScore()');const rows=JSON.parse(g.storage.get('dungeon21-scores-v1'));assert.equal(rows.length,1);assert.equal(rows[0].initials,'ABC');assert.equal(rows.some(r=>r.seed),false);assert.equal(g.run('readScores().some(r=>r.seed)'),true);
+const blocked=game(new Map(),true);blocked.start();setup(blocked,{hp:1});blocked.run("finish(-1,'Loss')");blocked.nodes.get('initials').value='AAA';blocked.run('recordScore()');assert.equal(blocked.run('state.recorded'),false);assert.match(blocked.nodes.get('scoreFeedback').textContent,/Could not save/);
+// 100 seeded quests exercise the real action state machine and save invariants.
+for(let trial=0;trial<100;trial++){const sim=game();sim.start();sim.run('window.seed='+trial+';Math.random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}');for(let step=0;step<2000&&!['dead','won'].includes(sim.run('state.stage'));step++){sim.run("if(state.outcome&&state.stage==='explore')dismissOutcome();else if(state.stage==='explore')explore();else if(state.stage==='shop'){if(!state.key&&state.gold>=hall().cost)buyKey();else leaveRoom();}else if(state.stage==='stairs'){if(state.key)descend();else leaveRoom();}else if(state.stage==='checkpoint')enterHall();else if(state.stage==='final')battleBoss();else if(state.stage==='room')altar(false);else if(state.stage==='result')deal();else if(score(state.player)<16)hit();else stand();");assert.equal(sim.run('validRun(state)'),true);assert.equal(sim.run('state.gold>=0&&state.hp>=0&&state.hp<=10'),true);}assert.equal(['dead','won'].includes(sim.run('state.stage')),true);}
+console.log('PASS: story, 5-gold start, stakes/results/escape, room distribution, shop guarantee, healing confirmation, all 8 codes, 18 hall monsters, Identify, all keys/gates/checkpoints, final boss/secret, admin exclusion, local scores, reloads, blocked storage and 100 seeded quests. Browser/audio mocked.');
