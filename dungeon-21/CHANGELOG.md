@@ -2,6 +2,14 @@
 
 Changes are listed newest first. Dates use America/Toronto time.
 
+## 0.12.0 — 2026-10-30
+
+### Changed
+- Results appear automatically 1.2 seconds after the foe’s final move, with no Show Result tap. Opening blackjacks remain visible for 1.8 seconds before settling.
+- HIT/STAND flashes sit beside the acting side’s cards instead of above the battle. Cards and totals remain clear; vocoded speech is preserved.
+- Ties now display a DRAW result screen with the returned stake.
+- Inventory, Status and background tabs pause automatic settlement. Saved reviews resume and settle only once.
+
 ## 0.11.2 — 2026-10-30
 
 ### Fixed

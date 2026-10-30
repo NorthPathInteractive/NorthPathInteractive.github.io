@@ -1,6 +1,6 @@
 # Dungeon 21
 
-Playable blackjack dungeon quest, v0.11.2. In development.
+Playable blackjack dungeon quest, v0.12.0. In development.
 
 [Play the game](https://northpathinteractive.github.io/dungeon-21/) · [Project page](https://northpathinteractive.github.io/projects/dungeon-21/) · [CHANGELOG.md](CHANGELOG.md)
 
@@ -87,3 +87,7 @@ Battle outcomes stay on their result screen. Continue after defeating a monster 
 ## Opening blackjacks (v0.11.2)
 
 An opening natural blackjack reveals both hands and waits for Show Result before applying payouts, damage or monster defeat. This uses the same saved monster-review state as ordinary turns, including after reload. Player, monster and simultaneous blackjacks retain their existing rules.
+
+## Automatic results and hand callouts (v0.12.0)
+
+HIT/STAND callouts sit beside the acting hand, with totals and cards unobstructed. After the final foe move, the hand stays visible for 1.2 seconds before automatic results; opening blackjacks remain visible for 1.8 seconds. Inventory, Status and hidden tabs pause the sequence. Reload resumes review without paying again. Ties have a DRAW result screen.

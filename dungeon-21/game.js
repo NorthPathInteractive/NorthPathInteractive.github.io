@@ -25,7 +25,7 @@ function validRun(r) {
     ['hp','max','gold','kills','depth','pot','identify','healing'].every(k=>Number.isSafeInteger(r[k])&&r[k]>=0) &&
     (r.turnLog===undefined||(Array.isArray(r.turnLog)&&r.turnLog.every(line=>typeof line==='string')))&&
     (r.turnFrames===undefined||(Array.isArray(r.turnFrames)&&Number.isInteger(r.turnIndex)&&r.turnIndex>=0&&(!r.turnFrames.length||r.turnIndex<r.turnFrames.length)&&r.turnFrames.every(f=>f&&['REVEAL','HIT','STAND','BUST'].includes(f.move)&&typeof f.text==='string'&&Array.isArray(f.cards)&&f.cards.length>=2&&f.cards.every(c=>c&&['A','2','3','4','5','6','7','8','9','10','J','Q','K'].includes(c.r)&&['♠','♥','♣','♦'].includes(c.s))))) &&
-    (!r.outcome || (['win','loss'].includes(r.outcome.kind)&&typeof r.outcome.message==='string'&&typeof r.outcome.defeated==='boolean'&&[r.outcome.player,r.outcome.foe].every(Number.isSafeInteger))) &&
+    (!r.outcome || (['win','loss','tie'].includes(r.outcome.kind)&&typeof r.outcome.message==='string'&&typeof r.outcome.defeated==='boolean'&&[r.outcome.player,r.outcome.foe].every(Number.isSafeInteger))) &&
     (!r.room || ['chest','fountain','camp','altar','trap','quiet','shop','stairs','final'].includes(r.room)) &&
     (r.stage!=='room'||r.room==='altar'&&!r.enemy) &&
     r.max===10 && r.hp<=10 && Array.isArray(r.known) && r.known.every(k=>typeof k==='string') &&
@@ -143,15 +143,16 @@ function monsterHit() {
 }
 function flashMove(move,actor){
   if(move==='HIT'||move==='STAND')fx('voice-'+move.toLowerCase());
-  clearTimeout(moveTimer);$('moveActor').textContent=actor;$('moveText').textContent=move;
+  clearTimeout(moveTimer);$(actor==='YOU'?'playerHand':'enemyHand').append($('moveBanner'));$('moveActor').textContent=actor;$('moveText').textContent=move;
   $('moveBanner').hidden=false;$('moveBanner').classList.remove('move-flash');void document.body.offsetWidth;$('moveBanner').classList.add('move-flash');
   moveTimer=setTimeout(()=>{$('moveBanner').hidden=true;},950);
 }
 function monsterDone(){return !state.turnFrames?.length||state.turnIndex===state.turnFrames.length-1;}
 function scheduleMonster(){
   clearTimeout(monsterTimer);
-  if(state.stage!=='monster'||monsterDone()||!started||inventoryOpen||statusOpen||document.hidden)return;
-  monsterTimer=setTimeout(advanceMonster,1200);
+  if(state.stage!=='monster'||!started||inventoryOpen||statusOpen||document.hidden)return;
+  const done=monsterDone(),delay=done&&(state.turnFrames?.length||0)<=1?1800:1200;
+  monsterTimer=setTimeout(done?resolveMonster:advanceMonster,delay);
 }
 function advanceMonster(){
   clearTimeout(monsterTimer);
@@ -174,7 +175,7 @@ function stand(fromHit=false) {
   state.stage='monster';state.note=frames[0].text;fx('card');render();
 }
 function resolveMonster(){
-  if(state.stage!=='monster'||!monsterDone())return;
+  if(state.stage!=='monster'||!monsterDone()||inventoryOpen||statusOpen||document.hidden)return;
   clearTimeout(monsterTimer);state.stage='play';settle();
 }
 function settle() {
@@ -194,7 +195,7 @@ function finish(result,msg) {
   } else { state.tally.ties++;state.gold+=ante;msg+=` ${ante} gold returned. No damage.`;fx('tie'); }
   if(state.turnLog?.length)msg=state.turnLog[state.turnLog.length-1]+' '+msg;
   state.note=msg;$('playContent').scrollTop=0;
-  state.outcome=result===0?null:{kind:result>0?'win':'loss',player:score(state.player),foe:score(state.foe),message:msg,defeated:!state.enemy};
+  state.outcome={kind:result>0?'win':result<0?'loss':'tie',player:score(state.player),foe:score(state.foe),message:msg,defeated:!state.enemy};
   if(state.hp===0)endRun(msg);
   else if(state.enemy&&state.gold<state.enemy.ante&&(result>=0||state.gold<2))endRun(msg+` You cannot cover the next ${state.enemy.ante}-gold ante.`);
   render();
@@ -263,7 +264,7 @@ function highlightChanges(element,text) {
   }
   if(previous<text.length)append(text.slice(previous));
 }
-function toggleStatus(){if(!started)return;inventoryOpen=false;statusOpen=!statusOpen;renderStatus();renderInventory();if(statusOpen)$('closeStatusTop').focus();else $('actions').querySelector('button')?.focus();}
+function toggleStatus(){if(!started)return;inventoryOpen=false;statusOpen=!statusOpen;renderStatus();renderInventory();scheduleMonster();if(statusOpen)$('closeStatusTop').focus();else $('actions').querySelector('button')?.focus();}
 function renderStatus(){
   $('statusDetails').replaceChildren();
   const rows=[['Hall',`${state.hall+1}/4 · ${hall().name}`],['Health',`${state.hp}/${state.max}♥`],['Gold',`${state.gold}G`],['Rooms explored',state.depth],['Monsters defeated',state.kills],['Defeated in this hall',state.hallKills],['Key carried',state.key?hall().key+' key':'None'],['Healing potions',state.healing],['Identify potions',state.identify],['Known enemy types/levels',state.known.length],['Hands won / lost / tied',`${state.tally.wins} / ${state.tally.losses} / ${state.tally.ties}`],['Damage taken',`${state.tally.damage}♥`],['Health restored',`${state.tally.healed}♥`],['Escapes',state.tally.fled],['Current ante',state.enemy?state.enemy.ante+'G':'No battle'],['Your committed stake',state.pot+'G'],['Explorations since shop',state.sinceShop],['Hall password',hall().name.toUpperCase()],['Run mode',state.admin?'ADMIN TEST · not ranked':'Normal · ranked locally'],['Tracked time',Math.max(0,Math.floor((Date.now()-state.startedAt)/60000))+' minutes'],['Save',storageOK?'Saved on this browser':'Storage unavailable']];
@@ -321,7 +322,7 @@ function render() {
   $('stakes').textContent=state.enemy?`ANTE ${state.enemy.ante}G / HAND · `+(['play','monster'].includes(state.stage)?`POT ${state.pot*2}G`:'WIN RETURNS '+state.enemy.ante*2+'G'):'';
   const outcome=state.outcome&&state.stage!=='play'?state.outcome:null;
   $('resultScreen').hidden=!outcome;$('scene').hidden=!!outcome;$('message').hidden=!!outcome||state.stage==='monster';$('stakes').hidden=!!outcome;
-  if(outcome){$('resultTitle').textContent=outcome.kind==='win'?'WIN!':'LOSE';$('resultTotals').textContent=`YOU ${outcome.player>21?'BUST ('+outcome.player+')':outcome.player} / FOE ${outcome.foe>21?'BUST ('+outcome.foe+')':outcome.foe}`;highlightChanges($('resultMessage'),state.note);$('resultHint').textContent=state.stage==='dead'?'GAME OVER':state.stage==='won'?'THE SECRET REVEALED':outcome.kind==='win'?(outcome.defeated?'MONSTER DEFEATED':'ONE MONSTER HEART REMOVED'):'TRY ANOTHER HAND OR FLEE FOR 2 GOLD';}
+  if(outcome){$('resultTitle').textContent=outcome.kind==='win'?'WIN!':outcome.kind==='tie'?'DRAW':'LOSE';$('resultTotals').textContent=`YOU ${outcome.player>21?'BUST ('+outcome.player+')':outcome.player} / FOE ${outcome.foe>21?'BUST ('+outcome.foe+')':outcome.foe}`;highlightChanges($('resultMessage'),state.note);$('resultHint').textContent=state.stage==='dead'?'GAME OVER':state.stage==='won'?'THE SECRET REVEALED':outcome.kind==='tie'?'STAKE RETURNED':outcome.kind==='win'?(outcome.defeated?'MONSTER DEFEATED':'ONE MONSTER HEART REMOVED'):'TRY ANOTHER HAND OR FLEE FOR 2 GOLD';}
   $('table').hidden=!combat||!!outcome;
   if(combat){$('enemyLabel').textContent=m.name;$('enemyScore').textContent=state.stage==='play'?'?':score(state.foe);$('playerScore').textContent=score(state.player);cards('enemyCards',state.foe,state.stage==='play');cards('playerCards',state.player,false);}
   highlightChanges($('message'),state.note);$('monsterTurn').hidden=state.stage!=='monster';$('monsterLog').replaceChildren();if(state.stage==='monster')for(const line of state.turnLog){const li=document.createElement('li');li.textContent=line;$('monsterLog').append(li);}
@@ -334,7 +335,7 @@ function render() {
   if(state.stage==='checkpoint')button('ENTER HALL →',enterHall,'e');
   if(state.stage==='final')button('FACE THE KING · 8G',battleBoss,'e');
   if(state.stage==='room'){button('TOUCH ALTAR',()=>altar(true));button('LEAVE →',()=>altar(false),'e');}
-  if(state.stage==='monster')button(monsterDone()?'SHOW RESULT →':'NEXT MOVE →',monsterDone()?resolveMonster:advanceMonster,'e');
+  if(state.stage==='monster'){if(!monsterDone())button('NEXT MOVE →',advanceMonster,'e');else{button('RESOLVING…',()=>{});$('actions').children[0].disabled=true;}}
   if(state.stage==='play'){button('HIT +',hit,'h');button('STAND ■',stand,'s');}
   if(state.stage==='result'){button(`${outcome?.kind==='loss'?'TRY AGAIN':'NEXT HAND'} · ${state.enemy.ante}G`,deal,'e');const retry=$('actions').children[$('actions').children.length-1];retry.disabled=state.gold<state.enemy.ante;if(retry.disabled)retry.textContent=`TRY AGAIN · NEED ${state.enemy.ante}G`;if(outcome?.kind==='loss'){button('RUN · 2G',flee,'r');const run=$('actions').children[$('actions').children.length-1];run.disabled=state.gold<2;if(run.disabled)run.textContent='RUN · NEED 2G';}}
 
