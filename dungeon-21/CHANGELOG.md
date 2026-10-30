@@ -2,6 +2,20 @@
 
 Changes are listed newest first. Dates use America/Toronto time.
 
+## 0.7.0 — 2026-10-29
+
+### Added
+- Persistent Explore and Inventory buttons anchored at the bottom of the game screen. Room and battle details scroll above them; Explore remains visible but disabled during battles and unresolved choices.
+- An inventory panel showing healing potions, Identify potions and the current key. I opens/closes Inventory; Escape closes it.
+- Healing potions purchased for 5 gold each and carried until used. Healing restores up to 4 health, consumes one potion and asks for confirmation. Potion purchases also confirm before charging.
+- Result highlights: red for damage and spending, gold for gold gained, green for healing, purple for item/key information. Bold words and numbers retain their meaning without colour.
+
+### Changed
+- New quests start with no potions or keys, retaining the king's 5 starting gold.
+- Both healing and Identify potions now cost 5 gold in shops. Removed the direct gold-for-healing action; use a purchased potion through Inventory instead.
+- Inventory can be used during a living battle without paying another ante or resetting the hand. At full health or without a potion, healing is disabled.
+- Existing v0.6.0 quest saves retain their progress, gold and Identify potions and begin with zero healing potions. Local scores and older demo saves remain preserved.
+
 ## 0.6.0 — 2026-10-29
 
 ### Added
