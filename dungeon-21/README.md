@@ -1,6 +1,6 @@
 # Dungeon 21
 
-Playable blackjack dungeon quest, v0.8.0. In development.
+Playable blackjack dungeon quest, v0.9.0. In development.
 
 [Play the game](https://northpathinteractive.github.io/dungeon-21/) · [Project page](https://northpathinteractive.github.io/projects/dungeon-21/) · [CHANGELOG.md](CHANGELOG.md)
 
@@ -63,3 +63,7 @@ Inventory sits at the top of the game screen. Exploration offers Explore and Sta
 Status shows hall and gate progress, health, gold, supplies, kills and rooms, identified enemies, hand results, damage, healing, escapes, ante and stake, the hall password, mode, tracked time and local-save availability. New counters persist in the quest save. Existing saves retain all previous progress; counters and time that were not previously recorded are clearly labelled as starting at this update.
 
 Result text is compact: -1G ante, +2G returned, -1♥ and +4♥. Gold changes use gold/yellow text regardless of sign; health loss is red and healing green. Item/key information is purple. Coloured backgrounds have been removed; descriptions, words and signs retain the meaning.
+
+## Visible monster turns (v0.9.0)
+
+Stand reveals the monster's full hand and a turn log: reveal, any hits with running totals, then a stand or bust announcement. The hand stays visible until Show Result (E). Settlement occurs only once and the paid ante remains intact on reload. Hit reaching 21 uses the same review. A player bust or a natural blackjack still resolves immediately because the monster does not need to take a normal turn.

@@ -2,6 +2,17 @@
 
 Changes are listed newest first. Dates use America/Toronto time.
 
+## 0.9.0 — 2026-10-30
+
+### Added
+- A visible monster-turn review after Stand (also when your Hit reaches 21): the hidden card is revealed, hits are listed with their running totals, and the monster announces its final stand or bust.
+- Show Result resolves the reviewed hand once. The final decision is retained in the WIN/LOSE result text.
+- Pending monster-turn reviews survive reload with the already-paid stake intact. Battle controls and item use are locked during review to avoid changing a completed turn.
+
+### Changed
+- Standing no longer jumps straight to WIN/LOSE. The player can inspect the monster's full hand first.
+- Existing quest saves, inventory, counters and local scores remain compatible.
+
 ## 0.8.0 — 2026-10-29
 
 ### Added
