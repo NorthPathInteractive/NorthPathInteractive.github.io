@@ -2,6 +2,14 @@
 
 Changes are listed newest first. Dates use America/Toronto time.
 
+## 0.14.0 — 2026-10-30
+
+### Changed
+- Room/battle emphasis now marks actual signed changes; possible payouts, prices, required-key mentions and inventory counts remain plain.
+- Actual gold and health balance changes flash near the player’s cards, or on the result/room screen. Reloading or redrawing does not replay them.
+- Loss results describe the already-paid ante plainly, without suggesting another debit. Damage text reports only health actually lost.
+- The Red Key shop listing retains its requested red styling.
+
 ## 0.13.0 — 2026-10-30
 
 ### Added

@@ -1,6 +1,6 @@
 # Dungeon 21
 
-Playable blackjack dungeon quest, v0.13.0. In development.
+Playable blackjack dungeon quest, v0.14.0. In development.
 
 [Play the game](https://northpathinteractive.github.io/dungeon-21/) · [Project page](https://northpathinteractive.github.io/projects/dungeon-21/) · [CHANGELOG.md](CHANGELOG.md)
 
@@ -95,3 +95,7 @@ HIT/STAND callouts sit beside the acting hand, with totals and cards unobstructe
 ## Character voices (v0.13.0)
 
 The player keeps the original vocoded HIT/STAND samples. Each of the 18 monster types and the Crownless King has a distinct, stable pitch/tone/echo profile. Bats and imps are high and sharp; orcs and trolls are low and heavy; spirits echo; the Amethyst Dragon has the deepest, loudest booming profile. Bass shaping and compression keep monster speech controlled on the effects bus. Profiles apply equally to both words and follow the existing Sound setting. No external voice service or new download is needed.
+
+## Attribute feedback (v0.14.0)
+
+Only signed, actual changes receive emphasis in room/battle descriptions. Possible payouts, prices, required keys and item counts stay plain. The Red Key shop listing retains its intentional red item styling. Actual gold/health balance changes flash in the player hand area, result screen or room; these announcements are computed from balance changes between renders, never from a quoted cost. Loading or redrawing a save does not replay a change. The loss result describes the forfeited ante plainly because gold was already deducted on the deal. Damage text uses the actual health lost, capped at remaining health.

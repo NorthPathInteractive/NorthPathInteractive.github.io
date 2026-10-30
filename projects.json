@@ -116,7 +116,7 @@
     "cat": "games",
     "type": "Blackjack RPG",
     "status": "In development",
-    "version": "0.13.0",
+    "version": "0.14.0",
     "description": "Descend through four locked halls, battle monsters with blackjack, and uncover the secret of the Obsidian Veil.",
     "url": "https://northpathinteractive.github.io/dungeon-21/",
     "action": "Play Dungeon 21"

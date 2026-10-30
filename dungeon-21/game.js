@@ -11,7 +11,7 @@ const BOSS={name:'THE CROWNLESS KING',sprite:4,hearts:6,ante:8,damage:4};
 function hall(){return HALLS[state.hall];}
 function monster(e=state.enemy){return e?.boss?BOSS:{name:hall().names[e?.index||0],sprite:(e?.index||0)%5};}
 const sound = window.DungeonAudio;
-let state, muted = true, started = false, storageOK = true, inventoryOpen = false, inventoryNotice = '', statusOpen = false, moveTimer = null, monsterTimer = null;
+let state, muted = true, started = false, storageOK = true, inventoryOpen = false, inventoryNotice = '', statusOpen = false, moveTimer = null, monsterTimer = null, lastAttributes = null;
 function newTally(){return {wins:0,losses:0,ties:0,fled:0,damage:0,healed:0};}
 function fresh(hallIndex=0,admin=false) {
   return {id:Date.now().toString(36)+'-'+Math.random().toString(36).slice(2),hp:10,max:10,gold:admin?1000:5,kills:0,depth:0,hall:hallIndex,hallKills:0,key:false,sinceShop:0,admin,storySeen:false,final:false,
@@ -88,7 +88,7 @@ function explore() {
   state.sinceShop++;
   if(roll<.18) {
     state.room='chest';
-    if(Math.random()<.5) { const gold=3+state.hall*2;state.gold+=gold;state.note=`You lift a rusted lid. Beneath scraps of velvet: ${gold} gold.`; }
+    if(Math.random()<.5) { const gold=3+state.hall*2;state.gold+=gold;state.note=`You lift a rusted lid. Beneath scraps of velvet: +${gold} gold.`; }
     else { state.identify++;state.note='A stoppered glass eye rests in the chest. Identify potion +1. Its knowledge lasts for this run.'; }
     fx('treasure');
   } else if(roll<.30) {
@@ -119,7 +119,7 @@ function altar(touch) {
   state.stage='explore';
   if(!touch)state.note='You leave the floating coin untouched. The stone fingers close behind you. Nothing lost.';
   else if(Math.random()<.5){state.gold+=6;state.note='The coin splits into six. +6 gold. The altar falls silent.';fx('treasure');}
-  else {state.tally.damage+=Math.min(state.hp,2);state.hp=Math.max(0,state.hp-2);state.note='The stone hand seizes your wrist. −2 health. You pull free.';fx('hurt');flash('player-hurt');if(state.hp===0)endRun('The cursed altar takes your last health.');}
+  else {const damage=Math.min(state.hp,2);state.tally.damage+=damage;state.hp-=damage;state.note=`The stone hand seizes your wrist. −${damage} health. You pull free.`;fx('hurt');flash('player-hurt');if(state.hp===0)endRun(`The cursed altar takes your last health. −${damage} health.`);}
   render();
 }
 function endRun(reason) { state.stage='dead';state.pot=0;state.note=reason+` GAME OVER. Final score: ${state.gold} gold.`;fx('defeat'); }
@@ -144,8 +144,16 @@ function monsterHit() {
 function flashMove(move,actor){
   if(move==='HIT'||move==='STAND')fx('voice-'+move.toLowerCase(),actor);
   clearTimeout(moveTimer);$(actor==='YOU'?'playerHand':'enemyHand').append($('moveBanner'));$('moveActor').textContent=actor;$('moveText').textContent=move;
-  $('moveBanner').hidden=false;$('moveBanner').classList.remove('move-flash');void document.body.offsetWidth;$('moveBanner').classList.add('move-flash');
+  $('moveBanner').classList.remove('attribute-flash');$('moveBanner').hidden=false;$('moveBanner').classList.remove('move-flash');void document.body.offsetWidth;$('moveBanner').classList.add('move-flash');
   moveTimer=setTimeout(()=>{$('moveBanner').hidden=true;},950);
+}
+function flashAttributes(changes){
+  clearTimeout(moveTimer);
+  const parent=inventoryOpen?'inventoryPanel':state.outcome?'resultScreen':!$('table').hidden?'playerHand':'roomFeedback';
+  $(parent).append($('moveBanner'));$('moveActor').textContent='YOUR CHANGES';$('moveText').replaceChildren();
+  for(const change of changes){const line=document.createElement('span');line.className='delta-'+(change.kind==='gold'?'gold':change.amount<0?'loss':'heal');line.textContent=`${change.amount>0?'+':''}${change.amount} ${change.kind==='gold'?'GOLD':'♥'}`;$('moveText').append(line);}
+  $('moveBanner').hidden=false;$('moveBanner').classList.remove('move-flash');$('moveBanner').classList.add('attribute-flash');void document.body.offsetWidth;$('moveBanner').classList.add('move-flash');
+  moveTimer=setTimeout(()=>{$('moveBanner').hidden=true;},1500);
 }
 function monsterDone(){return !state.turnFrames?.length||state.turnIndex===state.turnFrames.length-1;}
 function scheduleMonster(){
@@ -188,11 +196,11 @@ function finish(result,msg) {
   if(state.stage!=='play'||!state.enemy)return;
   const e=state.enemy,m=monster(e),ante=state.pot;state.pot=0;state.stage='result';
   if(result>0) {
-    state.tally.wins++;state.gold+=ante*2;e.left--;msg+=` Collected ${ante*2} gold (net +${ante}).`;fx('hit');flash('enemy-hit');
+    state.tally.wins++;state.gold+=ante*2;e.left--;msg+=` Collected ${ante*2} gold.`;fx('hit');flash('enemy-hit');
     if(e.left===0) { state.kills++;state.hallKills++;state.enemy=null;state.stage=e.boss?'won':'explore';fx(e.boss?'clear':'victory');msg+=e.boss?' The Crownless King falls. The chamber holds stolen sunlight, sealed inside every coin. You break the crown, free the dawn, and return with the king’s long-buried truth.':` ${m.name} defeated! Explore onward.`; }
   } else if(result<0) {
-    state.tally.losses++;state.tally.damage+=Math.min(state.hp,e.damage);state.hp=Math.max(0,state.hp-e.damage);msg+=` Lost ${ante} gold. −${e.damage} health.`;fx('hurt');flash('player-hurt');
-  } else { state.tally.ties++;state.gold+=ante;msg+=` ${ante} gold returned. No damage.`;fx('tie'); }
+    const damage=Math.min(state.hp,e.damage);state.tally.losses++;state.tally.damage+=damage;state.hp-=damage;msg+=` Ante forfeited: ${ante}G. −${damage} health.`;fx('hurt');flash('player-hurt');
+  } else { state.tally.ties++;state.gold+=ante;msg+=` +${ante} gold returned. No damage.`;fx('tie'); }
   if(state.turnLog?.length)msg=state.turnLog[state.turnLog.length-1]+' '+msg;
   state.note=msg;$('playContent').scrollTop=0;
   state.outcome={kind:result>0?'win':result<0?'loss':'tie',player:score(state.player),foe:score(state.foe),message:msg,defeated:!state.enemy};
@@ -254,7 +262,7 @@ function compactResult(text){
 }
 function highlightChanges(element,text) {
   element.replaceChildren();text=compactResult(text);
-  const pattern=/(?:[+−–-]?\d+G|[+−–-]?\d+♥|(?:healing|identify)\s+potion\s*[+×]\s*\d+|(?:red|blue|gold|amethyst)\s+key)/gi;
+  const pattern=/(?:[+−–-]\d+G|[+−–-]\d+♥|(?:healing\s+potion|identify\s+potion|(?:red|blue|gold|amethyst)\s+key)\s*[+−–-]\s*\d+)/gi;
   let previous=0;
   const append=(content,type)=>{const span=document.createElement('span');span.textContent=content;if(type)span.className='impact impact-'+type;element.append(span);};
   for(const match of text.matchAll(pattern)) {
@@ -299,7 +307,7 @@ function submitCode(event){event?.preventDefault();const code=$('codeInput').val
 $('codeForm').onsubmit=submitCode;
 $('enterCode').onclick=()=>{menu('ENTER PASSWORD','Hall passwords start a new quest at that hall. Codes ignore capital letters.');$('codeForm').hidden=false;$('codeFeedback').textContent='';menuButton('BACK',backTitle);$('codeInput').focus();};
 $('viewScores').onclick=()=>{menu('HIGH SCORES','The richest survivors of the Obsidian Veil. STARTER entries are fictional. Admin runs are not ranked.');renderScores();$('menuScores').hidden=false;menuButton('BACK',backTitle);};
-function buyKey(){if(state.stage!=='shop'||state.key||state.gold<hall().cost)return;state.gold-=hall().cost;state.key=true;state.note=`You buy the ${hall().key} key. Its teeth are cold against your palm.`;fx('treasure');render();}
+function buyKey(){if(state.stage!=='shop'||state.key||state.gold<hall().cost)return;state.gold-=hall().cost;state.key=true;state.note=`${hall().key} key +1. Spent ${hall().cost} gold. Its teeth are cold against your palm.`;fx('treasure');render();}
 function buyIdentify(){if(state.stage!=='shop'||state.gold<5)return;if(!confirm('Buy 1 Identify potion for 5 gold?'))return;state.gold-=5;state.identify++;state.note='Identify potion +1. Spent 5 gold.';fx('treasure');render();}
 function leaveRoom(){if(!['shop','stairs'].includes(state.stage))return;state.stage='explore';state.note='You return to the passages.';render();}
 function descend(){if(state.stage!=='stairs')return;if(!state.key){state.note=`Requires ${hall().key} Key. The lock will not turn.`;render();return;}state.key=false;state.enemy=null;state.outcome=null;state.player=[];state.foe=[];state.pot=0;if(state.hall===3){state.final=true;state.stage='final';state.room='final';state.note='The amethyst lock melts into light. Beneath a glistening crystal sky, the Crownless King guards the final secret. A battle costs 8 gold per hand.';}else{state.hall++;state.hallKills=0;state.sinceShop=0;state.stage='checkpoint';state.room='stairs';state.note=`You descend into ${hall().name} Hall. PASSWORD: ${hall().name.toUpperCase()}. Remember it to start a future quest here. Your health, gold and inventory carry onward.`;}fx('heal');render();}
@@ -309,6 +317,9 @@ function applyPalette(){const colors=state.final?['#201733','#65527e','#bbc1ed',
 $('scoreForm').onsubmit=recordScore;
 $('initials').oninput=()=>{$('initials').value=$('initials').value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,3);};
 function render() {
+  const changes=[];
+  if(started&&lastAttributes?.run===state){if(state.gold!==lastAttributes.gold)changes.push({kind:'gold',amount:state.gold-lastAttributes.gold});if(state.hp!==lastAttributes.hp)changes.push({kind:'health',amount:state.hp-lastAttributes.hp});}
+  lastAttributes={run:state,gold:state.gold,hp:state.hp};
   applyPalette();
   if(!started){sound?.play('title');renderScores();return;}
   sound?.play(['play','monster','result'].includes(state.stage)?'battle':['dead','won'].includes(state.stage)?'silence':'explore');
@@ -344,7 +355,7 @@ function render() {
   $('finalScore').textContent=`${state.gold}G`;
   $('scoreFeedback').textContent=state.admin?'ADMIN TEST RUN — not ranked.':state.recorded?'Score saved on this device.':ended?'Enter up to 3 initials to record your score.':'';
   $('art').setAttribute('aria-label',m?m.name+' encounter':state.room==='stairs'?doorName()+' in the '+hall().name+' Hall':rooms[state.room]?.name||'A long dungeon hall with stone columns');
-  draw(m?m.sprite:-1,state.room);save();renderScores();renderStatus();renderInventory();scheduleMonster();
+  draw(m?m.sprite:-1,state.room);save();renderScores();renderStatus();renderInventory();scheduleMonster();if(changes.length)flashAttributes(changes);
 }
 function restart(){clearTimeout(monsterTimer);clearTimeout(moveTimer);$('moveBanner').hidden=true;inventoryOpen=false;statusOpen=false;state=fresh();$('initials').value='';save();started=false;backTitle();showStory();}
 $('restart').onclick=()=>{if(['dead','won'].includes(state.stage)||state.depth===0||confirm('Start a new run? Your current run will be replaced.'))restart();};

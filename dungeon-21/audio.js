@@ -6,7 +6,7 @@ window.DungeonAudio = (() => {
   const voices={};let voiceSource,voiceLoad;
   function loadVoices(){
     if(voiceLoad||typeof fetch!=='function')return;
-    voiceLoad=Promise.all(['hit','stand'].map(async word=>{try{const response=await fetch('audio/'+word+'.mp3?v=0.13.0');if(!response.ok)return;voices[word]=await ctx.decodeAudioData(await response.arrayBuffer());}catch{}}));
+    voiceLoad=Promise.all(['hit','stand'].map(async word=>{try{const response=await fetch('audio/'+word+'.mp3?v=0.14.0');if(!response.ok)return;voices[word]=await ctx.decodeAudioData(await response.arrayBuffer());}catch{}}));
   }
   // Rate, tone cutoff, bass boost, echo delay, level. The player's sample stays untouched.
   const voiceProfiles={
