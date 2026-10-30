@@ -2,6 +2,13 @@
 
 Changes are listed newest first. Dates use America/Toronto time.
 
+## 0.9.1 — 2026-10-30
+
+### Fixed
+- Corrected stale v0.6.0 stylesheet and script references. All asset cache versions now match the displayed v0.9.1, so an updated title cannot keep using the old combat code.
+- Moved the monster-turn review above the cards, with a larger stand/bust announcement, making it visible earlier on smaller screens.
+- Added a regression check that the displayed version and every local script/stylesheet cache version match.
+
 ## 0.9.0 — 2026-10-30
 
 ### Added

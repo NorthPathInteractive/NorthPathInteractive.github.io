@@ -1,6 +1,6 @@
 # Dungeon 21
 
-Playable blackjack dungeon quest, v0.9.0. In development.
+Playable blackjack dungeon quest, v0.9.1. In development.
 
 [Play the game](https://northpathinteractive.github.io/dungeon-21/) · [Project page](https://northpathinteractive.github.io/projects/dungeon-21/) · [CHANGELOG.md](CHANGELOG.md)
 
@@ -67,3 +67,5 @@ Result text is compact: -1G ante, +2G returned, -1♥ and +4♥. Gold changes us
 ## Visible monster turns (v0.9.0)
 
 Stand reveals the monster's full hand and a turn log: reveal, any hits with running totals, then a stand or bust announcement. The hand stays visible until Show Result (E). Settlement occurs only once and the paid ante remains intact on reload. Hit reaching 21 uses the same review. A player bust or a natural blackjack still resolves immediately because the monster does not need to take a normal turn.
+
+Version 0.9.1 fixes stale asset references; the monster-turn review appears above the cards. Release checks verify that the display and asset cache versions match.
