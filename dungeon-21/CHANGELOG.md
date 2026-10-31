@@ -2,6 +2,16 @@
 
 Changes are listed newest first. Dates use America/Toronto time.
 
+## 0.17.0 — 2026-10-30
+
+### Changed
+- Replaced the expanding battle log with a heading-free, fixed-height display of the last three moves. Cards and controls no longer move as the log fills.
+
+### Added
+- A small pixel-art RIP gravestone and run-stat recap on defeat, just above the scrolling Hall of Fortune.
+- The recap includes score, hall, health, explored rooms, defeated monsters, hand results, damage/healing, escapes, identified enemies and remaining supplies.
+- End timestamps keep new recap times fixed across reload. Older missing or partial statistics are labelled honestly; existing saves and scores remain compatible.
+
 ## 0.16.0 — 2026-10-30
 
 ### Changed

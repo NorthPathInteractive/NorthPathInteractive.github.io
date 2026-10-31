@@ -1,6 +1,6 @@
 # Dungeon 21
 
-Playable blackjack dungeon quest, v0.16.0. In development.
+Playable blackjack dungeon quest, v0.17.0. In development.
 
 [Play the game](https://northpathinteractive.github.io/dungeon-21/) · [Project page](https://northpathinteractive.github.io/projects/dungeon-21/) · [CHANGELOG.md](CHANGELOG.md)
 
@@ -107,3 +107,11 @@ Emerald retains its original sparse 72 BPM exploration theme. Ruby introduces an
 ## Combined battle log (v0.16.0)
 
 The battle log records the player’s opening hand, hits with card/totals, stands and busts, then the foe’s revealed moves in order. It remains visible during play and on the result screen, uses uniform 14px text, and resets each new hand. Player history is saved separately from foe animation frames so it survives stepping/reload without duplicating. Earlier saves remain valid; past player actions that were never recorded are not invented.
+
+## Defeat recap (v0.17.0)
+
+A defeated quest shows a palette-matched RIP gravestone and run statistics between score entry and the scrolling Hall of Fortune. It includes final gold, hall, remaining health, explored rooms, defeated monsters, hand results, damage/healing, escapes, known foes, remaining supplies, key and mode. Newly ended runs save their end time so the recap time stays fixed across reload. Older saves without an end timestamp show time as Not recorded; partially tracked older counters retain their explanation. Victory screens and score ranking are unchanged.
+
+## Fixed recent-move display (v0.17.0)
+
+The battle-log heading is removed. Only the last three moves are displayed in three fixed two-line slots; long entries truncate visually while retaining their full accessible text. Earlier moves remain saved internally. The display has the same height from the opening hand onward, preventing log growth from moving the cards and controls.
