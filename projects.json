@@ -131,5 +131,16 @@
     "url": "https://northpathinteractive.github.io/c64-rpg-dev/",
     "action": "Open C64 Lab",
     "version": "0.1.5"
+  },
+  {
+    "id": "kaleidoscope",
+    "name": "Kaleidoscope",
+    "group": "development",
+    "cat": "music",
+    "type": "Audio & visual experiences",
+    "version": "0.2.0",
+    "description": "Take a trip through the Kaleidoscope. Watch Orbital Drift and Sunlit.",
+    "url": "https://kaleidoscope.smit0284.chatgpt.site",
+    "action": "Enter Kaleidoscope"
   }
 ]
