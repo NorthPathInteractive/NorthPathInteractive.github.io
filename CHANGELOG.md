@@ -1,3 +1,6 @@
+## 2026-11-01
+- Updated Kaleidoscope’s catalogue link and homepage version for its public GitHub-hosted chord labs.
+
 # North Path Interactive site changelog
 
 Shared website and publishing-process changes, newest first. Project release histories live in each project's own changelog.

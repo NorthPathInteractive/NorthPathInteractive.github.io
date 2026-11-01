@@ -138,9 +138,9 @@
     "group": "development",
     "cat": "music",
     "type": "Audio & visual experiences",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "description": "Take a trip through the Kaleidoscope. Watch Orbital Drift and Sunlit.",
-    "url": "https://kaleidoscope.smit0284.chatgpt.site",
+    "url": "https://northpathinteractive.github.io/projects/kaleidoscope/",
     "action": "Enter Kaleidoscope"
   }
 ]
