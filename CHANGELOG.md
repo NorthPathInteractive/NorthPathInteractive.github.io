@@ -1,3 +1,6 @@
+## 2026-11-06
+- Updated the Kaleidoscope catalogue card for the Nightshift release.
+
 ## 2026-11-01
 - Updated Kaleidoscope’s catalogue link and homepage version for its public GitHub-hosted chord labs.
 

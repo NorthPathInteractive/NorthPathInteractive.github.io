@@ -1,5 +1,8 @@
 # Kaleidoscope
 
+## v0.4.1 — 2026-11-06
+- Added Nightshift · Wrong Number as the newest record, with the extended 140 BPM mix and its psychedelic music video.
+
 ## v0.4.0 — 2026-11-02
 - Added a dedicated songs and films gallery for Orbital Drift — A Father’s Return, Sunlit — Kaleidoscope Journey, and Black Coil — Living Machine, in that order.
 - Added video and audio preview players backed by Google Drive; retained existing public chord labs.
