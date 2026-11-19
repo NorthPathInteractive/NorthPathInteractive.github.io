@@ -1,5 +1,11 @@
 # Kaleidoscope
 
+## v0.5.0 — 2026-11-18
+- Added Unicorn Dreams to the record gallery as release 004, newest first.
+- Added a dedicated HTML/CSS/canvas cloud-world animation with a music player below, designed for headphone listening and reduced-motion accessibility.
+- Uploaded the revised four-minute soundtrack to Google Drive. Public playback depends on sharing permissions; live playback has not been verified.
+- Preserved the previous three records and existing chord labs.
+
 ## v0.4.0 — 2026-11-02
 - Added a dedicated songs and films gallery for Orbital Drift — A Father’s Return, Sunlit — Kaleidoscope Journey, and Black Coil — Living Machine, in that order.
 - Added video and audio preview players backed by Google Drive; retained existing public chord labs.
