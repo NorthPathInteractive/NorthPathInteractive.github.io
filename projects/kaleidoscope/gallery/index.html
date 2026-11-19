@@ -146,9 +146,9 @@ function enter(){
  $("mp-status").textContent="";experience.classList.add("active");experience.setAttribute("aria-hidden","false");document.body.classList.add("experience-open");
  if(film)film.remove();
  if(t[5]){
-   film=document.createElement("video");film.className="experience-video"+(current===3?" orbital-drift-original":"");film.muted=true;film.playsInline=true;film.preload="metadata";film.loop=false;film.controls=false;film.src=driveMedia(t[5]);film.setAttribute("aria-label",t[0]+" psychedelic video");
+   film=document.createElement("video");film.className="experience-video"+(current===3?" orbital-drift-original":"");film.muted=true;film.playsInline=true;film.preload="metadata";film.loop=false;film.controls=false;film.dataset.sourceFallback="false";film.src=current===2?driveAudio(t[5]):driveMedia(t[5]);film.setAttribute("aria-label",t[0]+" psychedelic video");
    film.addEventListener("loadedmetadata",()=>{videoReady=true;syncVisual()});
-   film.addEventListener("error",()=>{showMediaFallback("Video could not stream directly. Check its Google Drive public sharing.");videoReady=false});
+   film.addEventListener("error",()=>{videoReady=false;if(current===2&&film.dataset.sourceFallback!=="true"){film.dataset.sourceFallback="true";film.src=driveMedia(t[5]);film.load();return}showMediaFallback("Video could not stream in the gallery. The original is available through the Google Drive link below.")});
  }else{
    film=document.createElement("iframe");film.className="experience-iframe";film.src="../unicorn-dreams/?embed=1";film.title="Unicorn Dreams temporary HTML visuals";film.setAttribute("aria-label","Unicorn Dreams visual");
    $("mp-status").textContent="Unicorn Dreams currently uses temporary HTML visuals until its video is rendered.";
