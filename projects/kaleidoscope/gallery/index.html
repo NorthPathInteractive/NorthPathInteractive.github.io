@@ -35,6 +35,8 @@ body.experience-open{overflow:hidden}
 .mp-volume{width:75px;accent-color:#9579ff}.mp-status{font-size:11px;color:#bea9ce;min-height:0;text-align:center}
 @media(max-width:520px){.mp-volume{width:45px}.mp-row{gap:10px}.mp-time{font-size:11px}.experience-caption{display:none}}
 @media(orientation:portrait){.experience-video{object-fit:contain}}@media(orientation:portrait) and (max-width:900px){.experience-video.orbital-drift-original{object-fit:cover!important;object-position:center center;width:100%;height:100%;transform:scale(1.12,1.04);transform-origin:center center}}
+/* Sunlit mobile portrait crop: center the artwork without stretching the 16:9 source. */
+@media(orientation:portrait) and (max-width:900px){.experience-video.sunlit-mobile{object-fit:cover!important;object-position:center center;width:100%;height:100%;transform:scale(1.07);transform-origin:center center}}
 .experience-instrument-icons{position:absolute;z-index:5;top:calc(12px + env(safe-area-inset-top));right:calc(12px + env(safe-area-inset-right));grid-template-columns:repeat(3,65px);gap:6px;padding:7px;border:1px solid #ffffff40;border-radius:15px;background:#070411c9;backdrop-filter:blur(15px)}
 .experience-instrument-icons a{display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:#fff;font-weight:700;font-size:9px;text-align:center}
 .experience-instrument-icons a:focus-visible{outline:2px solid white;outline-offset:2px}
@@ -146,7 +148,7 @@ function enter(){
  $("mp-status").textContent="";experience.classList.add("active");experience.setAttribute("aria-hidden","false");document.body.classList.add("experience-open");
  if(film)film.remove();
  if(t[5]){
-   film=document.createElement("video");film.className="experience-video"+(current===3?" orbital-drift-original":"");film.muted=true;film.playsInline=true;film.preload="metadata";film.loop=false;film.controls=false;film.dataset.sourceFallback="false";film.src=current===2?driveAudio(t[5]):driveMedia(t[5]);film.setAttribute("aria-label",t[0]+" psychedelic video");
+   film=document.createElement("video");film.className="experience-video"+(current===3?" orbital-drift-original":current===2?" sunlit-mobile":"");film.muted=true;film.playsInline=true;film.preload="metadata";film.loop=false;film.controls=false;film.dataset.sourceFallback="false";film.src=current===2?driveAudio(t[5]):driveMedia(t[5]);film.setAttribute("aria-label",t[0]+" psychedelic video");
    film.addEventListener("loadedmetadata",()=>{videoReady=true;syncVisual()});
    film.addEventListener("error",()=>{videoReady=false;if(current===2&&film.dataset.sourceFallback!=="true"){film.dataset.sourceFallback="true";film.src=driveMedia(t[5]);film.load();return}showMediaFallback("Video could not stream in the gallery. The original is available through the Google Drive link below.")});
  }else{
