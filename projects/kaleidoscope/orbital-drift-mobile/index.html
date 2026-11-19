@@ -1,0 +1,38 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Orbital Drift · Portrait Visual</title><style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#010314}canvas{display:block;width:100%;height:100%;touch-action:none}body:after{content:"";pointer-events:none;position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 35%,#02021385 100%);mix-blend-mode:multiply}#label{position:fixed;pointer-events:none;left:0;right:0;bottom:8%;text-align:center;color:#f2e9ff;text-shadow:0 0 20px #bd9fff;letter-spacing:.45em;font:600 clamp(10px,2.2vh,15px) ui-monospace,monospace;opacity:0;transition:opacity 2s}#label.visible{opacity:.6}@media(prefers-reduced-motion:reduce){#label{transition:none}}
+</style></head><body><canvas id="world" aria-label="Animated portrait space journey for Orbital Drift: moving stars, luminous orbital rings, two lights traveling toward reunion"></canvas><div id="label">ORBITAL DRIFT</div><script>
+"use strict";
+const canvas=document.getElementById("world"),g=canvas.getContext("2d",{alpha:false});let w=0,h=0,dpr=1;
+let songTime=0,playing=false,lastFrame=performance.now(),freeTime=0;
+const TWO=Math.PI*2;
+function rnd(seed){let x=Math.sin(seed*127.1+78.233)*43758.5453;return x-Math.floor(x)}
+const stars=Array.from({length:170},(_,i)=>({x:rnd(i+2),y:rnd(i+20),z:.25+rnd(i+300)*.75,size:.45+rnd(i+800)*1.6,phase:rnd(i+1800)*TWO}));
+function resize(){dpr=Math.min(devicePixelRatio||1,2);w=Math.max(1,innerWidth);h=Math.max(1,innerHeight);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);g.setTransform(dpr,0,0,dpr,0,0)}
+window.addEventListener("resize",resize);resize();
+window.addEventListener("message",e=>{if(!e.data||e.data.type!=="orbital-sync")return;if(Number.isFinite(e.data.time))songTime=Math.max(0,e.data.time);playing=!!e.data.playing});
+function ellipse(x,y,rx,ry,rotation,color,width,alpha){g.save();g.translate(x,y);g.rotate(rotation);g.strokeStyle=color;g.lineWidth=width;g.globalAlpha=alpha;g.beginPath();g.ellipse(0,0,rx,ry,0,0,TWO);g.stroke();g.restore()}
+function glow(x,y,r,c,alpha=1){g.save();g.globalAlpha=alpha;const a=g.createRadialGradient(x,y,0,x,y,r);a.addColorStop(0,c);a.addColorStop(.21,c);a.addColorStop(1,"rgba(0,0,0,0)");g.fillStyle=a;g.beginPath();g.arc(x,y,r,0,TWO);g.fill();g.restore()}
+function light(x,y,r,c){g.save();g.globalCompositeOperation="screen";const gr=g.createRadialGradient(x,y,0,x,y,r*8);gr.addColorStop(0,"#fff");gr.addColorStop(.05,c);gr.addColorStop(.22,c+"66");gr.addColorStop(1,"transparent");g.fillStyle=gr;g.beginPath();g.arc(x,y,r*8,0,TWO);g.fill();g.restore()}
+function render(now){const dt=Math.min(.055,(now-lastFrame)/1000);lastFrame=now;if(playing)freeTime=songTime;else if(!window.parent||window.parent===window)freeTime+=dt;const t=freeTime;
+g.fillStyle="#020417";g.fillRect(0,0,w,h);
+const section=Math.floor(t/32)%4,shift=(Math.sin(t*.055)+1)*.5,cy=h*(.43+.09*Math.sin(t*.013));
+let bg=g.createLinearGradient(0,0,w,h);const tones=[["#071938","#29124d"],["#0a1230","#3c1741"],["#091f35","#183d56"],["#1d1549","#4b295b"]][section];bg.addColorStop(0,tones[0]);bg.addColorStop(1,tones[1]);g.fillStyle=bg;g.fillRect(0,0,w,h);
+g.save();g.globalCompositeOperation="screen";
+for(let k=0;k<5;k++){const x=w*(.5+.43*Math.sin(t*.009+k*2.6)),y=h*(.48+.32*Math.cos(t*.007+k*1.8));const r=Math.max(w,h)*(.45+.1*Math.sin(t*.016+k));const gr=g.createRadialGradient(x,y,0,x,y,r);const colors=["rgba(91,115,230,.18)","rgba(195,104,234,.13)","rgba(61,208,233,.13)","rgba(255,170,222,.1)","rgba(110,103,246,.15)"];gr.addColorStop(0,colors[k]);gr.addColorStop(1,"transparent");g.fillStyle=gr;g.fillRect(0,0,w,h)}
+g.restore();
+stars.forEach((s,i)=>{const sy=((s.y+t*.00025*s.z)%1)*h;const sx=((s.x+Math.sin(t*.03+i)*.001)%1)*w;g.globalAlpha=(.3+.65*(.5+.5*Math.sin(t*(.3+s.z)+s.phase)))*s.z;g.fillStyle=i%7===0?"#e5bdff":"#cbf9ff";g.beginPath();g.arc(sx,sy,s.size*s.z,0,TWO);g.fill()});g.globalAlpha=1;
+const cx=w*(.5+.045*Math.sin(t*.018)),radius=Math.min(w*.52,h*.28);
+g.save();g.globalCompositeOperation="screen";for(let j=0;j<8;j++){const rr=radius*(.52+j*.11+Math.sin(t*.04+j)*.013);ellipse(cx,cy,rr,rr*.75,t*.004+j*.37,j%2?"#baafff":"#68efff",Math.max(1,w*.003),.09+j*.025)}g.restore();
+const core=g.createRadialGradient(cx,cy,0,cx,cy,radius*.82);core.addColorStop(0,"#f1f6ff");core.addColorStop(.09,"#8acded");core.addColorStop(.27,"#4e6bb5");core.addColorStop(.56,"#263e7c55");core.addColorStop(1,"transparent");g.globalAlpha=.38+.15*Math.sin(t*.07);g.fillStyle=core;g.beginPath();g.arc(cx,cy,radius*.82,0,TWO);g.fill();g.globalAlpha=1;
+const phase=t*.014,approach=(Math.sin(t*.012-.8)+1)/2,sep=w*(.36-.25*approach);
+const x1=cx-sep+Math.sin(phase)*w*.07,y1=cy+Math.cos(phase)*h*.11;
+const x2=cx+sep+Math.sin(phase+1.5)*w*.07,y2=cy-Math.cos(phase+1.4)*h*.13;
+g.strokeStyle="rgba(194,210,255,.2)";g.lineWidth=1.5;g.beginPath();g.moveTo(x1,y1);g.quadraticCurveTo(cx,cy-h*.16,x2,y2);g.stroke();
+light(x1,y1,Math.max(2,w*.007),"#b4f2ff");light(x2,y2,Math.max(2,w*.007),"#ffcaee");
+const reunion=Math.max(0,1-Math.abs(x1-x2)/(w*.2));if(reunion>.1){light((x1+x2)/2,(y1+y2)/2,3+reunion*11,"#ffffff")}
+for(let k=0;k<20;k++){const p=(k/20+t*.007)%1;const tx=x1+(x2-x1)*p,ty=y1+(y2-y1)*p-Math.sin(p*Math.PI)*h*.11;g.fillStyle=k%2?"#bcacff":"#9eeeff";g.globalAlpha=.08+.32*(1-p);g.beginPath();g.arc(tx,ty,1.1+1.6*(1-p),0,TWO);g.fill()}g.globalAlpha=1;
+const vignette=g.createLinearGradient(0,0,0,h);vignette.addColorStop(0,"rgba(1,3,16,.45)");vignette.addColorStop(.5,"transparent");vignette.addColorStop(1,"rgba(1,3,16,.6)");g.fillStyle=vignette;g.fillRect(0,0,w,h);
+requestAnimationFrame(render)}
+requestAnimationFrame(render);
+setTimeout(()=>document.getElementById("label").classList.add("visible"),1100);
+</script></body></html>
