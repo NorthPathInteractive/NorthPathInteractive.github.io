@@ -1,5 +1,10 @@
 # Kaleidoscope
 
+## v0.5.1 — 2026-11-18
+- Restored the existing gallery cinema layout for Unicorn Dreams, displaying an enhanced psychedelic HTML film in the large visual viewport rather than linking to a separate scene.
+- Added one compact soundtrack player below the visuals, with a full-screen visuals control.
+- Left earlier records and their video playback intact. Soundtrack access still requires public Google Drive sharing.
+
 ## v0.5.0 — 2026-11-18
 - Added Unicorn Dreams to the record gallery as release 004, newest first.
 - Added a dedicated HTML/CSS/canvas cloud-world animation with a music player below, designed for headphone listening and reduced-motion accessibility.
