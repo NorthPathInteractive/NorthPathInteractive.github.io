@@ -92,6 +92,9 @@ $("prev").onclick=()=>select(current-1);$("next").onclick=()=>select(current+1);
 sleeves.forEach((el,i)=>el.onclick=()=>{if(i===current)enter();else select(i)});
 const fmt=t=>Number.isFinite(t)?Math.floor(t/60)+":"+String(Math.floor(t%60)).padStart(2,"0"):"--:--";
 function syncVisual(){
+ if(film&&film.tagName==="IFRAME"&&current===3&&film.dataset.portrait==="true"&&film.contentWindow){
+   film.contentWindow.postMessage({type:"orbital-sync",time:audio.currentTime||0,playing:!audio.paused},"*");
+ }
  if(!film||film.tagName!=="VIDEO"||!videoReady||!Number.isFinite(audio.currentTime))return;
  if(Math.abs((film.currentTime||0)-audio.currentTime)>0.45){try{film.currentTime=audio.currentTime}catch(e){}}
  if(audio.paused){film.pause()}else if(film.paused){film.play().catch(()=>{})}
@@ -124,7 +127,10 @@ function enter(){
  iconHost.style.display=featured.length?"grid":"none";
  $("mp-status").textContent="";experience.classList.add("active");experience.setAttribute("aria-hidden","false");document.body.classList.add("experience-open");
  if(film)film.remove();
- if(t[5]){
+ if(current===3 && window.matchMedia("(orientation: portrait) and (max-width: 900px)").matches){
+   film=document.createElement("iframe");film.className="experience-iframe";film.src="../orbital-drift-mobile/";film.title="Orbital Drift · mobile portrait visual";film.dataset.portrait="true";
+   film.addEventListener("load",syncVisual);
+ }else if(t[5]){
    film=document.createElement("video");film.className="experience-video";film.muted=true;film.playsInline=true;film.preload="metadata";film.loop=false;film.controls=false;film.src=driveMedia(t[5]);film.setAttribute("aria-label",t[0]+" psychedelic video");
    film.addEventListener("loadedmetadata",()=>{videoReady=true;syncVisual()});
    film.addEventListener("error",()=>{showMediaFallback("Video could not stream directly. Check its Google Drive public sharing.");videoReady=false});
