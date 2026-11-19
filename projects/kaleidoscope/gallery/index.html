@@ -59,6 +59,7 @@ const tracks=[["Unicorn Dreams","A Living Cloud World","Analog cosmic ambient ·
 const DRIVE_KEY="AIzaSyDnwtu62uppcx4l1iHEYv_-lSjIoOrVCqk";
 const $=id=>document.getElementById(id);
 const driveMedia=id=>"https://www.googleapis.com/drive/v3/files/"+encodeURIComponent(id)+"?alt=media&key="+encodeURIComponent(DRIVE_KEY);
+const driveAudio=id=>"https://drive.usercontent.google.com/download?id="+encodeURIComponent(id)+"&export=download&confirm=t";
 const driveView=id=>"https://drive.google.com/file/d/"+encodeURIComponent(id)+"/view";
 function showMediaFallback(message){const box=$("mp-status");box.textContent=message+" ";const id=tracks[current][6];if(id){const a=document.createElement("a");a.href=driveView(id);a.target="_blank";a.rel="noopener noreferrer";a.textContent="Open soundtrack in Google Drive";a.style.cssText="color:#ffd1f6;text-decoration:underline";box.append(a)}if(tracks[current][5]){const a=document.createElement("a");a.href=driveView(tracks[current][5]);a.target="_blank";a.rel="noopener noreferrer";a.textContent=" · Open video in Google Drive";a.style.cssText="color:#ffd1f6;text-decoration:underline";box.append(a)}}
 const sleeves=[...document.querySelectorAll(".sleeve")];
@@ -136,7 +137,7 @@ function enter(){
    $("mp-status").textContent="Unicorn Dreams currently uses temporary HTML visuals until its video is rendered.";
  }
  visual.insertBefore(film,$("experience-caption"));
- audio.src=driveMedia(t[6]);audio.volume=Number($("mp-volume").value);
+ audio.dataset.fallbackTried="false";audio.src=driveAudio(t[6]);audio.volume=Number($("mp-volume").value);
  audio.load();syncPlayer();$("experience-back").focus();
  audio.play().catch(()=>{showMediaFallback("Soundtrack could not start. Check public Drive sharing and try Play.")});
 }
@@ -146,7 +147,7 @@ $("mp-volume").oninput=e=>audio.volume=Number(e.target.value);
 $("mp-seek").oninput=e=>{const d=audio.duration;if(Number.isFinite(d))audio.currentTime=Number(e.target.value);syncPlayer()};
 audio.addEventListener("timeupdate",syncPlayer);audio.addEventListener("durationchange",syncPlayer);
 audio.addEventListener("play",syncPlayer);audio.addEventListener("pause",syncPlayer);audio.addEventListener("ended",syncPlayer);
-audio.addEventListener("error",()=>{showMediaFallback("Audio could not load from Google Drive. Check sharing permissions or API restrictions.");syncPlayer()});
+audio.addEventListener("error",()=>{if(experience.classList.contains("active")&&audio.dataset.fallbackTried!=="true"){audio.dataset.fallbackTried="true";$("mp-status").textContent="Trying alternate audio source…";audio.src=driveMedia(tracks[current][6]);audio.load();audio.play().catch(()=>{});return}showMediaFallback("Audio streaming failed. The original soundtrack is available through the Google Drive link below.");syncPlayer()});
 document.addEventListener("keydown",e=>{if(experience.classList.contains("active")){if(e.key==="Escape"){if($("instrument-overlay").classList.contains("active"))closeInstrument();else leave()}return}if(e.key==="ArrowLeft")select(current-1);if(e.key==="ArrowRight")select(current+1)});
 const deck=$("deck");deck.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse")return;start=e.clientX;swiped=false},{passive:true});
 deck.addEventListener("pointerup",e=>{if(start===null)return;const dx=e.clientX-start;if(Math.abs(dx)>40){swiped=true;select(current+(dx<0?1:-1))}start=null},{passive:true});
