@@ -141,7 +141,7 @@ function enter(){
  const t=tracks[current];audio.pause();videoReady=false;
  $("mp-title").textContent=t[0];$("experience-caption").textContent=t[0];
  const iconHost=$("experience-instruments");
- const featured=current===3?[["../instruments/#driftglass","driftglass.svg","Driftglass"],["../halo-glass/","halo-glass.svg","Halo Glass"]]:current===1?[["../black-coil/","black-coil.svg","Black Coil"]]:current===2?[["../sunlit/","sunlit.svg","Sunlit"]]:[];
+ const featured=current===3?[["../instruments/#driftglass","driftglass.svg","Driftglass"],["../halo-glass/","halo-glass.svg","Halo Glass"]]:current===1?[["../black-coil/","black-coil.svg","Black Coil"]]:current===2?[["../sunlit/","sunlit.svg","Sunlit"],["../instruments/#moonclock","moonclock.svg","Moonclock"],["../instruments/#gravity-well","gravity-well.svg","Gravity Well"],["../sunshower/","sunshower.svg","Sunshower"]]:[];
  iconHost.replaceChildren();
  featured.forEach(([href,src,name])=>{const a=document.createElement("a");a.href=href;a.title="Play "+name;a.addEventListener("click",e=>{e.preventDefault();openInstrument(href,name,a)});a.setAttribute("aria-label","Play "+name+" instrument");const span=document.createElement("span");span.className="ei-icon";const img=document.createElement("img");img.src="../assets/instruments/"+src+"?v=20261119b";img.alt="";span.append(img);a.append(span,document.createTextNode(name));iconHost.append(a)});
  iconHost.style.display=featured.length?"grid":"none";
