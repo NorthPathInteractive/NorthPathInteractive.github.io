@@ -81,7 +81,7 @@ const driveView=id=>"https://drive.google.com/file/d/"+encodeURIComponent(id)+"/
 function showMediaFallback(message){const box=$("mp-status");box.textContent=message+" ";const id=tracks[current][6];if(id){const a=document.createElement("a");a.href=driveView(id);a.target="_blank";a.rel="noopener noreferrer";a.textContent="Open soundtrack in Google Drive";a.style.cssText="color:#ffd1f6;text-decoration:underline";box.append(a)}if(tracks[current][5]){const a=document.createElement("a");a.href=driveView(tracks[current][5]);a.target="_blank";a.rel="noopener noreferrer";a.textContent=" · Open video in Google Drive";a.style.cssText="color:#ffd1f6;text-decoration:underline";box.append(a)}}
 const releaseDates=["NOV 17, 2026","OCT 31, 2026","OCT 30, 2026","OCT 29, 2026"];
 const stories=[
- {text:"A four-minute ambient voyage built from slow, floating harmonies and luminous melodic phrases. This is the original first song from our latest session, now restored as the soundtrack for Record 004. The desktop and mobile films are the next step in bringing its world to life.",genre:"Ambient · Analog-inspired · Dreamscape"},
+ {text:"A four-minute ambient voyage built from slow, floating harmonies and luminous melodic phrases. This is the original first song from our latest session, now restored as the soundtrack for Record 004. Its responsive psychedelic visual film transforms rolling pastel cloud seas, celestial rings and luminous dream structures across desktop and portrait mobile screens.",genre:"Ambient · Analog-inspired · Dreamscape"},
  {text:"Our darker turn: a hypnotic living machine shaped from industrial textures, uneasy atmosphere, and a deliberate 80 BPM pulse. Black Coil explores how repetition, pressure and evolving synth sounds can make machinery feel almost alive.",genre:"Industrial psychedelia · Hypnotic electronics · 80 BPM"},
  {text:"A bright contrast to the shadows: house rhythms at 130 BPM, sparkling synthesizers, and pastel kaleidoscopic visuals. Sunlit grew as a playful meeting of dance-floor momentum and a colorful, shifting visual world.",genre:"Bright house · Psychedelic electronic · 130 BPM"},
  {text:"Our first Kaleidoscope record tells a story of a father, his daughter, years apart and a reunion. We developed its ambient chords with Driftglass and later built Halo Glass, a soft, angelic lead instrument, to capture the floating glass-like character of the music. The original film accompanies the track.",genre:"Cinematic ambient · Story-driven electronica"}
@@ -117,6 +117,7 @@ $("prev").onclick=()=>select(current-1);$("next").onclick=()=>select(current+1);
 sleeves.forEach((el,i)=>el.onclick=()=>{if(i===current)enter();else select(i)});
 const fmt=t=>Number.isFinite(t)?Math.floor(t/60)+":"+String(Math.floor(t%60)).padStart(2,"0"):"--:--";
 function syncVisual(){
+ if(film&&film.tagName==="IFRAME"&&current===0&&film.contentWindow){film.contentWindow.postMessage({type:"oceans-sync",time:audio.currentTime||0,playing:!audio.paused},location.origin)}
  if(film&&film.tagName==="IFRAME"&&current===3&&film.dataset.portrait==="true"&&film.contentWindow){
    film.contentWindow.postMessage({type:"orbital-sync",time:audio.currentTime||0,playing:!audio.paused},"*");
  }
@@ -157,8 +158,8 @@ function enter(){
    film.addEventListener("loadedmetadata",()=>{videoReady=true;syncVisual()});
    film.addEventListener("error",()=>{videoReady=false;if(current===2&&film.dataset.sourceFallback!=="true"){film.dataset.sourceFallback="true";film.src=driveMedia(t[5]);film.load();return}showMediaFallback("Video could not stream in the gallery. The original is available through the Google Drive link below.")});
  }else{
-   film=document.createElement("iframe");film.className="experience-iframe";film.src="../unicorn-dreams/?embed=1";film.title="Oceans of Air temporary HTML visuals";film.setAttribute("aria-label","Oceans of Air visual");
-   $("mp-status").textContent="Temporary cloud visuals — Oceans of Air video is still in development.";
+   film=document.createElement("iframe");film.className="experience-iframe";film.src="../oceans-of-air/?embed=1";film.title="Oceans of Air psychedelic animated film";film.setAttribute("aria-label","Oceans of Air visual film, responsive for desktop and portrait mobile");
+   $("mp-status").textContent="Oceans of Air · immersive animated cloud voyage · desktop and mobile";
  }
  visual.insertBefore(film,$("experience-caption"));
  audio.dataset.fallbackTried="false";audio.src=driveAudio(t[6]);audio.volume=Number($("mp-volume").value);
