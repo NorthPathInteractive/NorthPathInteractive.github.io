@@ -1,5 +1,9 @@
 # Kaleidoscope
 
+## Audio correction — 2026-11-18
+- Replaced Unicorn Dreams gallery and standalone player source with a newly uploaded, uniquely named copy of the approved low-end-heavy V2 master; no musical changes to that mix.
+- Earlier records and their audio sources remain unchanged. Google Drive public sharing still needs to be enabled.
+
 ## v0.5.1 — 2026-11-18
 - Restored the existing gallery cinema layout for Unicorn Dreams, displaying an enhanced psychedelic HTML film in the large visual viewport rather than linking to a separate scene.
 - Added one compact soundtrack player below the visuals, with a full-screen visuals control.
