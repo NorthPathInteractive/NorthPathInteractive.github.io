@@ -1,0 +1,50 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#1b1745"><title>Oceans of Air · Visual Film · NPI Records 004</title><style>
+*{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#090d28}canvas{display:block;width:100%;height:100%;touch-action:none}body:after{content:"";pointer-events:none;position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 40%,#09082365 100%);mix-blend-mode:multiply}.credit{position:fixed;left:18px;bottom:16px;color:#fff9;font:600 10px ui-monospace,monospace;letter-spacing:.22em;pointer-events:none;text-shadow:0 2px 8px #17103b}@media(max-width:650px){.credit{font-size:8px;bottom:12px;left:12px}}body.embed .credit{display:none}
+</style></head><body><canvas id="film" role="img" aria-label="Oceans of Air: an animated psychedelic ocean of pastel clouds, floating light temples, drifting celestial rings and luminous atmospheric waves. Desktop and portrait compositions adapt to the screen."></canvas><div class="credit">OCEANS OF AIR · NPI RECORDS 004</div><script>
+"use strict";
+const canvas=document.getElementById("film"),c=canvas.getContext("2d",{alpha:false});
+if(new URLSearchParams(location.search).has("embed"))document.body.classList.add("embed");
+let W=1,H=1,D=1,t=0,playing=!document.body.classList.contains("embed"),last=performance.now(),external=false,frame=0;
+function resize(){D=Math.min(devicePixelRatio||1,1.7);W=innerWidth;H=innerHeight;canvas.width=Math.max(1,Math.floor(W*D));canvas.height=Math.max(1,Math.floor(H*D));c.setTransform(D,0,0,D,0,0)}
+addEventListener("resize",resize);resize();
+const TAU=Math.PI*2,clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x)),mix=(a,b,k)=>a+(b-a)*k;
+const palette=[
+["#0a1232","#46347e","#c27ac2","#ffd5ae","#b1f5eb"],
+["#1d1748","#7755ac","#ff91cb","#ffe1a5","#9ef3e3"],
+["#101c4d","#446fa8","#cba0fa","#ffe3c2","#b4eaff"],
+["#20134a","#8750a8","#ffb2b5","#f7e7b2","#d1fff0"],
+["#0a1232","#46347e","#c27ac2","#ffd5ae","#b1f5eb"]
+];
+function rgba(hex,alpha){let x=hex.replace("#","");return "rgba("+parseInt(x.slice(0,2),16)+","+parseInt(x.slice(2,4),16)+","+parseInt(x.slice(4,6),16)+","+alpha+")"}
+function circle(x,y,r,col){c.beginPath();c.arc(x,y,r,0,TAU);c.fillStyle=col;c.fill()}
+function glow(x,y,r,col,a=1){const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,rgba(col,a));g.addColorStop(.28,rgba(col,a*.45));g.addColorStop(1,rgba(col,0));c.fillStyle=g;c.fillRect(x-r,y-r,r*2,r*2)}
+function ellipse(x,y,rx,ry,colour,alpha=1,rot=0){c.save();c.translate(x,y);c.rotate(rot);c.scale(1,ry/rx);circle(0,0,rx,rgba(colour,alpha));c.restore()}
+function ring(x,y,r,phase,colour,opacity=.5){c.save();c.translate(x,y);c.rotate(phase);c.scale(1,.40);c.beginPath();c.arc(0,0,r,0,TAU);c.lineWidth=2;c.strokeStyle=rgba(colour,opacity);c.shadowBlur=20;c.shadowColor=colour;c.stroke();c.restore()}
+function pathWave(y,amp,frequency,offset,fill){c.beginPath();c.moveTo(-30,H+30);for(let x=-30;x<=W+40;x+=8){let xx=x/W;let z=y+Math.sin(xx*TAU*frequency+offset)*amp+Math.sin(xx*TAU*(frequency*2.4)-offset*.6)*amp*.23;c.lineTo(x,z)}c.lineTo(W+30,H+30);c.closePath();c.fillStyle=fill;c.fill()}
+function cloud(x,y,rx,ry,col,opacity){const g=c.createRadialGradient(x,y,0,x,y,rx);g.addColorStop(0,rgba(col,opacity));g.addColorStop(.42,rgba(col,opacity*.7));g.addColorStop(1,rgba(col,0));c.save();c.translate(x,y);c.scale(1,ry/rx);c.fillStyle=g;c.beginPath();c.arc(0,0,rx,0,TAU);c.fill();c.restore()}
+function prism(x,y,size,colour,phase){c.save();c.translate(x,y);c.rotate(Math.sin(phase)*.06);c.shadowColor=colour;c.shadowBlur=size*.6;c.strokeStyle=rgba(colour,.7);c.fillStyle=rgba(colour,.09);c.lineWidth=Math.max(1,size*.016);c.beginPath();c.moveTo(0,-size);c.lineTo(size*.55,-size*.25);c.lineTo(size*.44,size*.72);c.lineTo(0,size);c.lineTo(-size*.44,size*.72);c.lineTo(-size*.55,-size*.25);c.closePath();c.fill();c.stroke();c.beginPath();c.moveTo(0,-size);c.lineTo(0,size);c.moveTo(-size*.55,-size*.25);c.lineTo(size*.44,size*.72);c.moveTo(size*.55,-size*.25);c.lineTo(-size*.44,size*.72);c.stroke();c.restore()}
+function temple(x,y,scale,colour,phase){c.save();c.translate(x,y);c.scale(scale,scale);c.rotate(Math.sin(phase)*.025);c.shadowColor=colour;c.shadowBlur=24;c.strokeStyle=rgba(colour,.62);c.fillStyle="rgba(220,198,255,.07)";c.lineWidth=1.6;for(let i=-2;i<=2;i++){const px=i*32;c.beginPath();c.moveTo(px-7,70);c.lineTo(px-7,-45);c.lineTo(px,-62);c.lineTo(px+7,-45);c.lineTo(px+7,70);c.closePath();c.fill();c.stroke()}c.beginPath();c.moveTo(-95,-48);c.lineTo(0,-106);c.lineTo(95,-48);c.lineTo(-95,-48);c.moveTo(-103,70);c.lineTo(103,70);c.stroke();glow(0,-112,60,colour,.65);c.restore()}
+function draw(time){const portrait=W/H<.8,aspect=portrait?1:0,progress=clamp(time/240),section=Math.min(3,Math.floor(progress*4)),transition=progress*4-section;let p=palette[section];const breath=Math.sin(time*.12),horizon=H*(portrait?.57:.56),base=Math.min(W,H),drift=time*.012;
+const sky=c.createLinearGradient(0,0,0,H);sky.addColorStop(0,p[0]);sky.addColorStop(.4,p[1]);sky.addColorStop(.72,p[2]);sky.addColorStop(1,p[0]);c.fillStyle=sky;c.fillRect(0,0,W,H);
+glow(W*(portrait?.5:.62),H*.36,base*.85,p[3],.20+.07*breath);glow(W*.24,H*.17,base*.65,p[2],.22);glow(W*.85,H*.76,base*.7,p[4],.15);
+c.save();c.globalCompositeOperation="screen";
+for(let j=0;j<3;j++){const x=W*(.5+.17*Math.sin(time*.003+j*2)),y=H*(.28+j*.18);glow(x,y,base*(.35+j*.12),j===1?p[4]:p[3],.08)}
+for(let i=0;i<16;i++){const seed=i*2.39996,depth=(i%5)/5,x=W*(.5+.65*Math.sin(seed+time*(.0015+depth*.001))),y=H*(.1+.78*((i*.173+time*.00024*(i%3+1))%1)),r=base*(.10+depth*.20);cloud(x,y,r,r*(portrait?1.6:.8),i%3===0?p[4]:i%3===1?p[2]:p[3],.10+depth*.07)}
+c.restore();
+for(let i=0;i<9;i++){const depth=i/9,y=horizon+depth*H*.56+Math.sin(time*.06+i)*3,amp=(portrait?10:18)*(1+depth*3);pathWave(y,amp,1.2+depth*2.3,drift*(.4+depth)+i*.9,rgba(i%3===0?p[4]:i%3===1?p[2]:p[3],.06+depth*.11))}
+for(let i=0;i<9;i++){const y=horizon+i*H*.055;const g=c.createLinearGradient(0,y,0,y+H*.1);g.addColorStop(0,rgba(p[3],.08));g.addColorStop(1,rgba(p[2],0));pathWave(y,12+i*2,1.5+i*.22,time*.018+i*.7,g)}
+c.save();c.globalCompositeOperation="screen";
+const coreX=W*(portrait?.5:.54)+Math.sin(time*.035)*base*.05,coreY=H*(portrait?.42:.43)+Math.cos(time*.027)*H*.03;
+glow(coreX,coreY,base*(portrait?.48:.42),p[3],.25+.08*Math.sin(time*.23));
+for(let k=0;k<8;k++){const r=base*(.08+k*.067),angle=time*(.009+(k%3)*.003)+k*.6;ring(coreX,coreY,r,angle,k%2?p[4]:p[3],(.15+.11*Math.sin(time*.1+k))*(portrait?.75:1))}
+for(let i=0;i<34;i++){let phase=i*2.39996,orbit=base*(.14+(i%9)*.045),angle=phase+time*(.008+(i%5)*.002),x=coreX+Math.cos(angle)*orbit,y=coreY+Math.sin(angle)*orbit*(portrait?1.12:.55),size=(i%5+1)*.7;glow(x,y,size*6,i%3?p[4]:p[3],.38);circle(x,y,size,rgba("#ffffff",.55))}
+c.restore();
+if(progress>.20){const alpha=clamp((progress-.2)*9)*(.25+.2*Math.sin(time*.04));c.save();c.globalAlpha=alpha;temple(W*(portrait?.51:.28),H*(portrait?.64:.60),base*(portrait?.004:.005),p[4],time*.014);c.restore()}
+if(progress>.42){const alpha=clamp((progress-.42)*8)*(.22+.25*Math.sin(time*.025));c.save();c.globalAlpha=alpha;for(let i=0;i<4;i++){const x=W*(portrait?.5:.70)+Math.sin(i*2.1+time*.01)*base*.19,y=H*(.22+i*.14)+Math.cos(time*.017+i)*base*.04;prism(x,y,base*(.05+i*.02),i%2?p[4]:p[3],time*.04+i)}c.restore()}
+if(progress>.68){c.save();c.globalCompositeOperation="screen";const alpha=clamp((progress-.68)*6);for(let i=0;i<7;i++){const x=W*(.12+i*.13),y=H*(.30+.13*Math.sin(i+time*.016));glow(x,y,base*.18,p[3],alpha*.12)}c.restore()}
+const fadeIn=clamp(time/9),fadeOut=clamp((240-time)/16);c.fillStyle="rgba(6,9,27,"+(1-Math.min(fadeIn,fadeOut))*.95+")";c.fillRect(0,0,W,H);
+}
+function animate(now){const delta=Math.min((now-last)/1000,.07);last=now;if(playing&&!external)t=Math.min(240,t+delta);if(playing||frame++===0)draw(t);requestAnimationFrame(animate)}
+requestAnimationFrame(animate);
+addEventListener("message",e=>{if(e.origin!==location.origin)return;const d=e.data;if(d&&d.type==="oceans-sync"){external=true;t=Math.max(0,Math.min(240,Number(d.time)||0));playing=!!d.playing;draw(t)}});
+</script></body></html>
