@@ -3,6 +3,13 @@
 
 # North Path Interactive site changelog
 
+## 2026-11-19 — Kaleidoscope listening room launch
+
+- Promote Kaleidoscope from In development to Completed and label the milestone v1.0.0 on the homepage and project page.
+- Introduce a featured What's New at North Path announcement linking directly to the listening room and its project page.
+- Describe Kaleidoscope as an immersive home for original albums, animated visuals and playable instruments, with responsive announcement styling.
+
+
 Shared website and publishing-process changes, newest first. Project release histories live in each project's own changelog.
 
 ## 2026-10-29 — Driftloom project introduction
