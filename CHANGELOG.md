@@ -3,6 +3,14 @@
 
 # North Path Interactive site changelog
 
+## 2026-11-21 — Read Aloud Lab mockup
+
+- Add a direct test page at /dev/read-aloud-test/ for browser-based reading of uploaded PDF, DOCX, TXT and Markdown files.
+- Extract and keep document text in the browser tab; use the device’s speech voices with voice and speed controls.
+- Note that image-only scanned PDFs need OCR. Keep this experiment off the homepage and project catalogue.
+
+
+
 ## 2026-11-19 — Kaleidoscope listening room launch
 
 - Promote Kaleidoscope from In development to Completed and label the milestone v1.0.0 on the homepage and project page.

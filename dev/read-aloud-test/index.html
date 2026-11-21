@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Read Aloud Lab · North Path Interactive</title>
+<style>
+:root{color-scheme:dark;--bg:#11121c;--panel:#1b1d2b;--line:#34364a;--ink:#f5f1ff;--muted:#b9b5c9;--violet:#ad8cff;--orange:#ffb46b;--lime:#d9f27a}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 85% 0%,#33274d 0,transparent 38%),var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:900px;margin:auto;padding:32px 20px 64px}a{color:var(--lime)}header{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:34px}header a{text-decoration:none}.brand{font-weight:800;letter-spacing:.08em;color:var(--orange)}.eyebrow{color:var(--lime);text-transform:uppercase;letter-spacing:.15em;font-size:.75rem;font-weight:700}h1{font-size:clamp(2rem,7vw,4rem);line-height:1.02;margin:.25em 0}p{color:var(--muted)}.card{background:color-mix(in srgb,var(--panel) 92%,transparent);border:1px solid var(--line);border-radius:20px;padding:24px;margin:18px 0;box-shadow:0 16px 50px #0003}.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.drop{border:1.5px dashed #77718c;border-radius:14px;padding:24px;text-align:center;background:#141521}.drop.drag{border-color:var(--lime);background:#242432}button,select,input[type=range]{accent-color:var(--violet)}button,select{font:inherit;color:var(--ink);background:#292a3a;border:1px solid #4c4d64;border-radius:10px;padding:10px 14px}button{cursor:pointer}button.primary{background:var(--violet);color:#181324;border:0;font-weight:750}button:disabled{opacity:.45;cursor:not-allowed}input[type=file]{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}label.filebutton{display:inline-block;background:#292a3a;border:1px solid #4c4d64;border-radius:10px;padding:10px 14px;cursor:pointer}textarea{width:100%;min-height:220px;resize:vertical;background:#10111a;color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:16px;font:inherit}label{color:var(--muted)}.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;align-items:end}.field{display:grid;gap:7px}.status{min-height:1.5em;color:var(--lime)}.progress{height:5px;border-radius:8px;background:#363747;overflow:hidden;margin:15px 0}.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--violet),var(--orange));transition:width .2s}small{color:var(--muted)}.notice{border-left:3px solid var(--orange);padding-left:12px}
+</style>
+</head>
+<body><main>
+<header><a class="brand" href="/">NORTH PATH INTERACTIVE</a><a href="../../CHANGELOG.md">What’s new</a></header>
+<div class="eyebrow">A small experiment</div><h1>Read Aloud Lab</h1>
+<p>Drop in a document, choose a voice and listen. This mockup extracts text in your browser and uses your device’s built-in speech voices. Files are not uploaded or saved by this page.</p>
+<section class="card">
+<div id="drop" class="drop"><strong>Choose a document to read</strong><p>PDF, DOCX, TXT or Markdown. Text-based PDFs work best; scanned pages need OCR.</p><input id="file" type="file" accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"><label for="file" class="filebutton">Choose file</label><div id="filename"><small>Or drag a file onto this box</small></div></div>
+<p id="status" class="status" role="status">Ready. Try the sample below or choose a document.</p>
+</section>
+<section class="card">
+<div class="controls">
+<div class="field"><label for="voice">Voice</label><select id="voice"><option>Loading voices…</option></select></div>
+<div class="field"><label for="speed">Speed: <span id="speedval">1.0×</span></label><input id="speed" type="range" min=".65" max="1.6" value="1" step=".05"></div>
+<div class="row"><button class="primary" id="play">▶ Play</button><button id="pause" disabled>Ⅱ Pause</button><button id="stop" disabled>■ Stop</button></div>
+</div><div class="progress"><i id="bar"></i></div>
+<label for="text">Extracted text (editable)</label><textarea id="text" spellcheck="false">Welcome to the Read Aloud Lab, a North Path Interactive experiment. Choose a document above, or listen to this short sample. Use the voice menu and speed slider to make the narration comfortable. Your document stays in this browser tab while you listen.</textarea>
+<p class="notice"><small>PDF text extraction uses PDF.js. DOCX extraction uses Mammoth. Your browser’s speech engine reads the text; voices and playback quality vary by device.</small></p>
+</section>
+<footer><small>Mockup · <a href="../../CHANGELOG.md">Site changelog</a></small></footer>
+</main>
+<script type="module">
+const $=s=>document.querySelector(s), input=$("#file"), text=$("#text"), status=$("#status"), drop=$("#drop"), bar=$("#bar");
+let voices=[],chunks=[],chunkIndex=0,playing=false;
+function loadVoices(){voices=speechSynthesis.getVoices();const sel=$("#voice"),old=sel.value;sel.innerHTML="";voices.forEach((v,i)=>{const o=document.createElement("option");o.value=i;o.textContent=v.name+" — "+v.lang;sel.append(o)});if(old)sel.value=old;if(!voices.length){const o=document.createElement("option");o.textContent="Device default";sel.append(o)}}
+loadVoices();speechSynthesis.onvoiceschanged=loadVoices;
+$("#speed").oninput=e=>$("#speedval").textContent=Number(e.target.value).toFixed(2).replace(/0$/,"")+"×";
+function sayStatus(s){status.textContent=s}
+function setButtons(active){$("#play").disabled=active;$("#pause").disabled=!active;$("#stop").disabled=!active}
+function splitText(s){return s.match(/[\s\S]{1,2200}(?:\s|$)/g)||[]}
+function speakNext(){if(!playing)return;if(chunkIndex>=chunks.length){playing=false;setButtons(false);bar.style.width="100%";sayStatus("Finished.");return}
+const u=new SpeechSynthesisUtterance(chunks[chunkIndex]);const v=voices[Number($("#voice").value)];if(v)u.voice=v;u.rate=Number($("#speed").value);u.onend=()=>{chunkIndex++;bar.style.width=Math.round(chunkIndex/chunks.length*100)+"%";speakNext()};u.onerror=e=>{playing=false;setButtons(false);sayStatus("Playback stopped: "+e.error)};speechSynthesis.speak(u)}
+$("#play").onclick=()=>{if(!text.value.trim())return sayStatus("There’s no text to read yet.");speechSynthesis.cancel();chunks=splitText(text.value.trim());chunkIndex=0;playing=true;setButtons(true);bar.style.width="0%";sayStatus("Reading aloud…");speakNext()};
+$("#pause").onclick=()=>{if(speechSynthesis.paused){speechSynthesis.resume();$("#pause").textContent="Ⅱ Pause";sayStatus("Reading aloud…")}else{speechSynthesis.pause();$("#pause").textContent="▶ Resume";sayStatus("Paused.")}};
+$("#stop").onclick=()=>{playing=false;speechSynthesis.cancel();setButtons(false);$("#pause").textContent="Ⅱ Pause";sayStatus("Stopped.");};
+async function readFile(file){$("#filename").textContent=file.name;sayStatus("Opening "+file.name+"…");
+try{let out="";
+if(file.name.toLowerCase().endsWith(".pdf")){const pdfjs=await import("https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs");pdfjs.GlobalWorkerOptions.workerSrc="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs";const pdf=await pdfjs.getDocument({data:await file.arrayBuffer()}).promise;for(let n=1;n<=pdf.numPages;n++){const p=await pdf.getPage(n),c=await p.getTextContent();out+=c.items.map(x=>x.str).join(" ")+"\n\n"}}
+else if(file.name.toLowerCase().endsWith(".docx")){const mammoth=await import("https://cdn.jsdelivr.net/npm/mammoth@1.9.0/mammoth.browser.min.js");out=(await mammoth.extractRawText({arrayBuffer:await file.arrayBuffer()})).value}
+else out=await file.text();
+if(!out.trim())throw new Error("No selectable text found. This may be a scanned PDF that needs OCR.");text.value=out;sayStatus("Loaded "+file.name+" ("+out.trim().split(/\s+/).length.toLocaleString()+" words). Ready to play.");bar.style.width="0%";
+}catch(e){sayStatus(e.message||"Could not read that file. Try another format.");}}
+input.onchange=()=>input.files?.[0]&&readFile(input.files[0]);
+for(const ev of ["dragenter","dragover"]){drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("drag")})}
+for(const ev of ["dragleave","drop"]){drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("drag")})}
+drop.addEventListener("drop",e=>{const f=e.dataTransfer.files?.[0];if(f)readFile(f)});
+</script></body></html>
