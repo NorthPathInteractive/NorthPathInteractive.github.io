@@ -3,6 +3,11 @@
 
 # North Path Interactive site changelog
 
+## 2026-11-21 — Read Aloud Lab homepage feature
+
+- Add a Read Aloud Lab icon and project card under In development, linking to the /dev/read-aloud-test/ demo.
+- Update the In development count and summarize the browser-based document-to-audio experiment.
+
 ## 2026-11-21 — Read Aloud Lab mockup
 
 - Add a direct test page at /dev/read-aloud-test/ for browser-based reading of uploaded PDF, DOCX, TXT and Markdown files.
