@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Print Shop | North Path Interactive</title>
+<style>
+:root { color-scheme: light; font-family: system-ui, sans-serif; color: #242721; background: #f6f4ed; }
+body { margin: 0; }
+.shell { max-width: 66rem; margin: auto; padding: 1.5rem clamp(1rem, 4vw, 3rem); }
+header { border-bottom: 1px solid #cccac0; padding-bottom: 1rem; }
+a { color: #365448; }
+h1 { font: 400 clamp(3rem, 9vw, 6rem)/1 Georgia, serif; margin: 2rem 0; }
+h2 { font: 400 2rem Georgia, serif; margin: 0 0 1rem; }
+button { cursor: pointer; font: inherit; }
+.product { text-align: left; padding: 1.25rem; width: min(100%, 24rem); background: #fffdf7; border: 1px solid #9aab9d; border-radius: .65rem; color: inherit; }
+.product strong { display: block; font: 400 1.6rem Georgia, serif; margin-bottom: .3rem; }
+.back { border: 0; padding: 0; background: none; color: #365448; text-decoration: underline; margin-bottom: 1.25rem; }
+.editor { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem; }
+.field { margin-bottom: 1rem; }
+label { display: flex; justify-content: space-between; gap: .5rem; font-weight: 600; }
+output { font-variant-numeric: tabular-nums; color: #365448; }
+input { display: block; box-sizing: border-box; width: 100%; padding: .7rem; margin-top: .35rem; font: inherit; border: 1px solid #82877c; border-radius: .35rem; }
+.print { background: #365448; color: white; border: 0; border-radius: .35rem; padding: .7rem 1rem; }
+.print:disabled { opacity: .55; cursor: default; }
+.hint { font-size: .9rem; }
+.preview { background: white; box-shadow: 0 3px 16px #24272119; }
+svg { display: block; width: 100%; height: auto; }
+#sheet text { font-family: "Times New Roman", "Liberation Serif", Times, serif; white-space: pre; }
+@media (max-width: 42rem) { .editor { grid-template-columns: 1fr; } }
+@page { size: letter portrait; margin: 0; }
+@media print {
+  body { background: white; }
+  .shell { max-width: none; padding: 0; }
+  header, h1, #products, .back, #editor-title, form, .preview-heading, .fold { display: none !important; }
+  .editor { display: block; }
+  .preview { box-shadow: none; }
+  #sheet { width: 8.5in; height: 11in; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+<header><a href="../../">North Path Interactive</a></header>
+<main>
+<h1>Print Shop</h1>
+<section id="products" aria-labelledby="products-title">
+<h2 id="products-title">Products</h2>
+<button class="product" id="comic"><strong>Comic Divider →</strong>Letter paper · Lengthwise fold</button>
+</section>
+<section id="details" hidden aria-labelledby="editor-title">
+<button class="back" id="back">← Products</button>
+<h2 id="editor-title" tabindex="-1">Comic Divider</h2>
+<div class="editor">
+<form id="divider">
+<div class="field">
+<label for="title">Series title <output id="title-size" for="title"></output></label>
+<input id="title" required placeholder="Helen of Wyndhorn">
+</div>
+<div class="field">
+<label for="note">Subtext (optional) <output id="note-size" for="note"></output></label>
+<input id="note" placeholder="Publisher, year or volume">
+</div>
+<p id="fit-status" role="status" class="hint"></p>
+<button class="print" id="print" type="submit" disabled>Print Divider</button>
+<p class="hint">Print on Letter at actual size with headers and footers off.</p>
+</form>
+<div>
+<h2 class="preview-heading">Print preview</h2>
+<div class="preview">
+<svg id="sheet" viewBox="0 0 612 792" role="img" aria-label="Letter sheet with divider text on the left of the fold">
+<line class="fold" x1="306" x2="306" y1="0" y2="792" stroke="#82877c" stroke-dasharray="5 5"/>
+<text id="printed-title" x="21.6"></text>
+<text id="printed-note" x="21.6"></text>
+</svg>
+</div>
+<p class="hint preview-heading">Dashed line marks the fold and appears only in the preview.</p>
+</div>
+</div>
+</section>
+</main>
+</div>
+<script>
+const byId = id => document.getElementById(id);
+const availableWidth = 306 - 21.6 - 7.2;
+const topMargin = 7.2;
+const lines = [
+  { input: byId('title'), text: byId('printed-title'), size: byId('title-size'), max: 30 },
+  { input: byId('note'), text: byId('printed-note'), size: byId('note-size'), max: 12 },
+];
+
+function updatePreview() {
+  let top = topMargin;
+  let overflow = false;
+  for (const { input, text, size, max } of lines) {
+    const value = input.value.trim();
+    text.textContent = value;
+    let points = max;
+    text.setAttribute('font-size', points);
+    while (points > 1 && text.getBBox().width > availableWidth) {
+      points -= 1;
+      text.setAttribute('font-size', points);
+    }
+    text.setAttribute('y', 0);
+    const bounds = text.getBBox();
+    text.setAttribute('y', top - bounds.y);
+    if (value) top += bounds.height + 3;
+    overflow ||= bounds.width > availableWidth;
+    size.value = value ? points + ' pt' : '';
+  }
+  byId('fit-status').textContent = overflow ? 'Shorten the text to fit on one line.' : '';
+  byId('print').disabled = overflow || !lines[0].input.value.trim();
+}
+
+byId('comic').addEventListener('click', () => {
+  byId('products').hidden = true;
+  byId('details').hidden = false;
+  updatePreview();
+  byId('editor-title').focus();
+});
+byId('back').addEventListener('click', () => {
+  byId('details').hidden = true;
+  byId('products').hidden = false;
+  byId('comic').focus();
+});
+byId('divider').addEventListener('input', updatePreview);
+byId('divider').addEventListener('submit', event => {
+  event.preventDefault();
+  if (!byId('print').disabled) window.print();
+});
+</script>
+</body>
+</html>
