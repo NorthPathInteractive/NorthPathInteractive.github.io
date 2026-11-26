@@ -3,6 +3,11 @@
 
 # North Path Interactive site changelog
 
+## 2026-11-25 — Commander Comics and Print Shop
+
+- List Commander Comics under Completed projects and the Comics filter, with a link to the live reading journal.
+- Add the missing Print Shop icon to its homepage card.
+
 ## 2026-11-21 — Read Aloud Lab homepage feature
 
 - Add a Read Aloud Lab icon and project card under In development, linking to the /dev/read-aloud-test/ demo.

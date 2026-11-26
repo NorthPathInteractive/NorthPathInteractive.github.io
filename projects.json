@@ -142,5 +142,15 @@
     "description": "Take a trip through the Kaleidoscope. Watch Orbital Drift and Sunlit.",
     "url": "https://northpathinteractive.github.io/projects/kaleidoscope/",
     "action": "Enter Kaleidoscope"
+  },
+  {
+    "id": "commander-comics",
+    "name": "Commander Comics",
+    "group": "completed",
+    "cat": "comics",
+    "type": "Comic reading journal",
+    "description": "Browse the reading journal, comic collections and upcoming releases.",
+    "url": "https://northpathinteractive.infinityfree.io/cmdrcomics/",
+    "action": "Open Commander Comics"
   }
 ]
